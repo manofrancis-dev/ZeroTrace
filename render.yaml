@@ -12,7 +12,7 @@ services:
       - key: BROWSER_SESSION_SAMESITE
         value: none
       - key: SANDBOX_API_URL
-        value: http://zero-trace-sandbox:8001
+        value: https://zero-trace-sandbox.onrender.com
       - key: ZERO_TRACE_API_KEY
         sync: false
       - key: VT_API_KEY
