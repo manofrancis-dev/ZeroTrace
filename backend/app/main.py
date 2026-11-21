@@ -390,7 +390,7 @@ async def sandbox(client, url):
             f"{SANDBOX_URL}/scan",
             json={"url": url},
             headers={"x-sandbox-key": SANDBOX_KEY},
-            timeout=23,
+            timeout=float(os.getenv("SANDBOX_TIMEOUT_SECONDS", "23")),
         )
         if r.status_code != 200:
             return {"status": "PROVIDER_ERROR", "configured": True, "http_status": r.status_code}
