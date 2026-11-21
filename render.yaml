@@ -1,10 +1,12 @@
 services:
   - type: web
-    name: zero-trace-api
+    name: zero-trace
     runtime: docker
-    dockerfilePath: ./backend/Dockerfile
+    dockerfilePath: ./backend/Dockerfile.render
     dockerContext: ./backend
     envVars:
+      - key: PORT
+        value: "10000"
       - key: CORS_ORIGINS
         value: https://manofrancis-dev.github.io
       - key: COOKIE_SECURE
@@ -12,23 +14,11 @@ services:
       - key: BROWSER_SESSION_SAMESITE
         value: none
       - key: SANDBOX_API_URL
-        value: https://zero-trace-sandbox.onrender.com
+        value: http://127.0.0.1:8001
       - key: ZERO_TRACE_API_KEY
         sync: false
       - key: VT_API_KEY
         sync: false
-      - key: SANDBOX_API_KEY
-        sync: false
       - key: WEBRISK_API_KEY
-        sync: false
-    healthCheckPath: /health
-
-  - type: web
-    name: zero-trace-sandbox
-    runtime: docker
-    dockerfilePath: ./backend/sandbox/Dockerfile
-    dockerContext: ./backend/sandbox
-    envVars:
-      - key: SANDBOX_API_KEY
         sync: false
     healthCheckPath: /health

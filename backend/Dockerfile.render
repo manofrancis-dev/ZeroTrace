@@ -1,0 +1,14 @@
+FROM mcr.microsoft.com/playwright/python:v1.63.0-noble
+WORKDIR /app
+COPY requirements.txt /tmp/requirements.txt
+COPY sandbox/requirements.txt /tmp/sandbox-requirements.txt
+RUN pip install --no-cache-dir -r /tmp/requirements.txt -r /tmp/sandbox-requirements.txt
+COPY app ./app
+COPY sandbox ./sandbox
+COPY start.sh ./start.sh
+RUN chmod +x ./start.sh
+ENV SANDBOX_API_URL=http://127.0.0.1:8001
+ENV SANDBOX_API_KEY=change-me
+ENV PORT=8000
+EXPOSE 8000
+CMD ["./start.sh"]
