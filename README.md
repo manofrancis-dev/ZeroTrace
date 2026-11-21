@@ -41,7 +41,7 @@ The sandbox should show `healthy` and the API should show `ok`.
 Open a second PowerShell window:
 
 ```powershell
-cd website
+cd docs
 python -m http.server 8080
 ```
 
