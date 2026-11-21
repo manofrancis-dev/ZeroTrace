@@ -36,8 +36,6 @@ function prov(name,p){
   if(!p)return `<div class="provider"><b>${esc(name)}</b><span class="state neutral">NO DATA</span></div>`;
   const status=String(p.status||"UNKNOWN"); let detail=status.replaceAll("_"," ");
   if(name==="VirusTotal"&&(status==="FOUND"||status==="ANALYZED")){const x=p.stats||{};detail=`${x.malicious||0} malicious · ${x.suspicious||0} suspicious · ${x.harmless||0} harmless · ${x.undetected||0} undetected${status==="ANALYZED"?" · fresh analysis":""}`;}
-  if(name==="VirusTotal File"&&status==="FOUND"){const x=p.stats||{};detail=`APK/file: ${x.malicious||0} malicious · ${x.suspicious||0} suspicious · SHA-256 ${String(p.sha256||"").slice(0,16)}…`;}
-  if(name==="Google Web Risk"&&status==="THREAT_FOUND")detail=`THREAT: ${(p.threats||[]).join(", ")||"unsafe resource"}`;
   if(name==="RDAP"&&status==="FOUND")detail=`Registration ${p.registration?new Date(p.registration).toLocaleDateString():"unknown"} · ${p.nameservers?.length||0} nameservers · DNSSEC ${p.secure_dns?"signed":"not signed"}`;
   if(name==="Dynamic Sandbox"&&status==="ANALYZED")detail=`${p.verdict||"ANALYZED"} · ${p.redirect_count||0} redirects · ${p.download_count||0} downloads · ${p.request_count||0} responses`;
   if(status==="ANALYSIS_PENDING")detail="VirusTotal accepted a fresh scan, but the analysis is still pending. Zero Trace does not treat pending data as clean.";
