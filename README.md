@@ -6,8 +6,6 @@ Zero Trace is a server-side URL analysis application. A URL copied from Chrome, 
 
 - **Real backend response is rendered by the website.** The previous frontend/backend field mismatch caused live results to be rejected and replaced by local heuristics.
 - **VirusTotal URL reputation**: existing URL reports, optional URL submission/polling, named engine detections, and honest `NO_EXISTING_REPORT` handling.
-- **VirusTotal file/APK reputation**: when the isolated sandbox downloads an APK, Zero Trace calculates its SHA-256 and looks up that file hash in VirusTotal.
-- **Google Web Risk**: checks MALWARE, SOCIAL_ENGINEERING and UNWANTED_SOFTWARE when `WEBRISK_API_KEY` is configured.
 - **RDAP**: domain/IP registration and nameserver metadata.
 - **Dynamic Sandbox**: isolated Chromium execution, final URL, HTTP status, redirect chain, page title, response count, downloads, SHA-256 for downloaded files, and suspicious page signals.
 - **SSRF protection**: loopback, private, local, link-local, multicast and reserved destinations are rejected before sandbox execution.
@@ -16,8 +14,6 @@ Zero Trace is a server-side URL analysis application. A URL copied from Chrome, 
 ## Important provider limits
 
 VirusTotal's public API has request limits and its documentation says submitted/queried IoCs are added to the VirusTotal dataset. Do not submit confidential or personal URLs. The public API is also not intended to be used as a commercial antivirus substitute.
-
-Google Web Risk requires a Google Cloud API key. If the key is absent, Zero Trace reports `NOT_CONFIGURED` rather than pretending the provider checked the URL.
 
 ## Existing `.env` is included unchanged
 

@@ -19,6 +19,4 @@ services:
         sync: false
       - key: VT_API_KEY
         sync: false
-      - key: WEBRISK_API_KEY
-        sync: false
     healthCheckPath: /health

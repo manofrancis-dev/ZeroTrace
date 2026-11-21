@@ -318,42 +318,6 @@ async def vt_url(client, url):
         return {"status": "PROVIDER_ERROR", "configured": True, "error": str(exc)[:180]}
 
 
-async def vt_file_hash(client, sha256):
-    if not VT_KEY or not sha256:
-        return {"status": "NOT_CONFIGURED", "configured": False}
-    try:
-        r = await client.get(f"https://www.virustotal.com/api/v3/files/{sha256}", headers={"x-apikey": VT_KEY, "accept": "application/json"})
-        if r.status_code == 404:
-            return {"status": "NO_EXISTING_REPORT", "configured": True, "meaning": "No existing VirusTotal file report for this SHA-256."}
-        if r.status_code != 200:
-            return {"status": "PROVIDER_ERROR", "configured": True, "http_status": r.status_code}
-        attrs = r.json().get("data", {}).get("attributes", {})
-        stats = attrs.get("last_analysis_stats", {}) or {}
-        results = attrs.get("last_analysis_results", {}) or {}
-        detections = [
-            {"engine": k, "category": v.get("category"), "result": v.get("result") or "Detection"}
-            for k, v in results.items()
-            if str(v.get("category", "")).lower() in {"malicious", "suspicious"}
-        ]
-        return {"status": "FOUND", "configured": True, "stats": stats, "detections": detections[:100], "total_engines": len(results), "sha256": sha256}
-    except Exception as exc:
-        return {"status": "PROVIDER_ERROR", "configured": True, "error": str(exc)[:180]}
-
-
-async def webrisk(client, url):
-    if not WR_KEY:
-        return {"status": "NOT_CONFIGURED", "configured": False}
-    try:
-        params = [("threatTypes", "MALWARE"), ("threatTypes", "SOCIAL_ENGINEERING"), ("threatTypes", "UNWANTED_SOFTWARE"), ("uri", url), ("key", WR_KEY)]
-        r = await client.get("https://webrisk.googleapis.com/v1/uris:search", params=params)
-        if r.status_code != 200:
-            return {"status": "PROVIDER_ERROR", "configured": True, "http_status": r.status_code}
-        threat = r.json().get("threat", {}) or {}
-        return {"status": "THREAT_FOUND" if threat else "NO_MATCH", "configured": True, "threats": threat.get("threatTypes", []) if isinstance(threat, dict) else []}
-    except Exception as exc:
-        return {"status": "PROVIDER_ERROR", "configured": True, "error": str(exc)[:180]}
-
-
 async def rdap(client, host):
     if not RDAP_ENABLED:
         return {"status": "NOT_CONFIGURED", "configured": False}
@@ -399,12 +363,12 @@ async def sandbox(client, url):
         return {"status": "PROVIDER_ERROR", "configured": True, "error": str(exc)[:180]}
 
 
-def combine_score(base_score, findings, vt, vt_file, wr, sb):
+def combine_score(base_score, findings, vt, sb):
     risk = 100 - base_score
     hard_threat = False
     strong_sources = 0
 
-    for source in (vt, vt_file):
+    for source in (vt,):
         stats = source.get("stats", {}) if source.get("status") in {"FOUND", "ANALYZED"} else {}
         malicious = int(stats.get("malicious", 0) or 0)
         suspicious = int(stats.get("suspicious", 0) or 0)
@@ -421,11 +385,6 @@ def combine_score(base_score, findings, vt, vt_file, wr, sb):
         if source.get("status") in {"FOUND", "ANALYZED"}:
             strong_sources += 1
 
-    if wr.get("status") == "THREAT_FOUND":
-        risk += min(85, 45 + 15 * len(wr.get("threats", [])))
-        hard_threat = True
-        strong_sources += 1
-
     malicious_signals = sb.get("malicious_signals", []) or []
     suspicious_signals = sb.get("suspicious_signals", []) or []
     if malicious_signals:
@@ -440,7 +399,7 @@ def combine_score(base_score, findings, vt, vt_file, wr, sb):
 
     # Provider errors and missing reports do not count as safe evidence.
     score = max(0, min(99, round(100 - risk)))
-    reputation_live = vt.get("status") in {"FOUND", "ANALYZED"} or vt_file.get("status") == "FOUND" or wr.get("status") in {"NO_MATCH", "THREAT_FOUND"}
+    reputation_live = vt.get("status") in {"FOUND", "ANALYZED"}
     sandbox_live = sb.get("status") == "ANALYZED"
     # Coverage caps prevent sparse evidence from looking like a near-certainty.
     # RDAP is contextual intelligence, not a threat verdict, so it does not lift
@@ -475,7 +434,6 @@ async def health():
         "version": "1.2.0",
         "providers": {
             "virustotal": bool(VT_KEY),
-            "google_web_risk": bool(WR_KEY),
             "rdap": RDAP_ENABLED,
             "sandbox": SANDBOX_ENABLED,
         },
@@ -522,24 +480,11 @@ async def scan(req: ScanRequest, request: Request):
     base_score, findings = local_checks(url)
     timeout = httpx.Timeout(HTTP_TIMEOUT, connect=min(6, HTTP_TIMEOUT))
     async with httpx.AsyncClient(timeout=timeout, follow_redirects=False, headers={"User-Agent": "ZeroTrace/1.1 Security Scanner"}) as client:
-        vt_result, web_risk, rdap_result, sandbox_result = await asyncio.gather(
+        vt_result, rdap_result, sandbox_result = await asyncio.gather(
             vt_url(client, url),
-            webrisk(client, url),
             rdap(client, host),
             sandbox(client, url),
         )
-
-        file_result = {"status": "NOT_APPLICABLE", "configured": bool(VT_KEY)}
-        if sandbox_result.get("downloads"):
-            apk = next((x for x in sandbox_result["downloads"] if str(x.get("filename", "")).lower().endswith(".apk")), None)
-            if apk and apk.get("sha256"):
-                file_result = await vt_file_hash(client, apk["sha256"])
-                if file_result.get("status") == "FOUND":
-                    stats = file_result.get("stats", {})
-                    if int(stats.get("malicious", 0) or 0):
-                        finding(findings, "CRITICAL", "VirusTotal APK/file detections", f"{stats.get('malicious', 0)} engines marked the downloaded APK malicious.", "VirusTotal file reputation")
-                    elif int(stats.get("suspicious", 0) or 0):
-                        finding(findings, "HIGH", "VirusTotal APK/file suspicious detections", f"{stats.get('suspicious', 0)} engines marked the downloaded APK suspicious.", "VirusTotal file reputation")
 
     if vt_result.get("status") in {"FOUND", "ANALYZED"}:
         stats = vt_result.get("stats", {})
@@ -550,20 +495,15 @@ async def scan(req: ScanRequest, request: Request):
         elif suspicious:
             finding(findings, "HIGH", "VirusTotal suspicious detections", f"{suspicious} security engines marked the URL suspicious.", "VirusTotal")
 
-    if web_risk.get("status") == "THREAT_FOUND":
-        finding(findings, "CRITICAL", "Google Web Risk threat match", "Google returned one or more unsafe-resource threat types.", "Google Web Risk")
-
     for signal in sandbox_result.get("malicious_signals", []) or []:
         finding(findings, "HIGH", "Dynamic sandbox threat signal", signal, "Dynamic Sandbox")
     for signal in sandbox_result.get("suspicious_signals", []) or []:
         finding(findings, "MEDIUM", "Dynamic sandbox suspicious signal", signal, "Dynamic Sandbox")
 
-    score, verdict, confidence = combine_score(base_score, findings, vt_result, file_result, web_risk, sandbox_result)
+    score, verdict, confidence = combine_score(base_score, findings, vt_result, sandbox_result)
 
     providers = {
         "VirusTotal": vt_result,
-        "VirusTotal File": file_result,
-        "Google Web Risk": web_risk,
         "RDAP": rdap_result,
         "Dynamic Sandbox": sandbox_result,
     }
@@ -591,11 +531,11 @@ async def scan(req: ScanRequest, request: Request):
         },
         "findings": findings,
         "providers": providers,
-        "detections": (vt_result.get("detections", []) or []) + (file_result.get("detections", []) or []),
-        "threat_names": list(dict.fromkeys((vt_result.get("threat_names", []) or []) + (file_result.get("threat_names", []) or []))),
+        "detections": (vt_result.get("detections", []) or []),
+        "threat_names": list(dict.fromkeys((vt_result.get("threat_names", []) or []))),
         "correlation": {
             "reporting_providers": reporting,
             "available_provider_count": len(providers),
-            "threat_agreement": sum(1 for x in (vt_result, file_result, web_risk, sandbox_result) if x.get("status") in {"THREAT_FOUND"} or int((x.get("stats") or {}).get("malicious", 0) or 0) > 0 or bool(x.get("malicious_signals"))),
+            "threat_agreement": sum(1 for x in (vt_result, sandbox_result) if x.get("status") in {"THREAT_FOUND"} or int((x.get("stats") or {}).get("malicious", 0) or 0) > 0 or bool(x.get("malicious_signals"))),
         },
     }
