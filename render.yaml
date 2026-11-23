@@ -15,8 +15,12 @@ services:
         value: none
       - key: SANDBOX_API_URL
         value: http://127.0.0.1:8001
+      - key: SANDBOX_TIMEOUT_SECONDS
+        value: "60"
       - key: ZERO_TRACE_API_KEY
         sync: false
+      - key: SANDBOX_API_KEY
+        generate: true
       - key: VT_API_KEY
         sync: false
     healthCheckPath: /health

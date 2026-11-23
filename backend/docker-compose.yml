@@ -7,6 +7,7 @@ services:
       - .env
     environment:
       SANDBOX_API_URL: "http://sandbox:8001"
+      SANDBOX_API_KEY: "${SANDBOX_API_KEY:-replace-with-another-random-secret}"
     ports:
       - "8000:8000"
     depends_on:

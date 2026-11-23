@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Zero Trace — Live URL Security Scanner</title>
+<link rel="icon" href="data:,">
 <meta name="description" content="Zero Trace live URL security scanner. Correlate VirusTotal, RDAP and isolated browser evidence.">
 <style>
 :root{--bg:#050a0e;--p:#0acl141b;--p2:#0d1a22;--line:#19313e;--t:#edf7fa;--m:#8ba4af;--c:#51e4ff;--g:#55e39a;--a:#ffc65c;--r:#ff6378}
@@ -35,26 +36,78 @@ function setProgress(v){ scanPct=Math.max(0,Math.min(100,v)); const bar=document
 setTimeout(()=>{const el=document.getElementById("apiHint"); if(el) el.textContent=API;},0);
 let activeController=null;
 const esc=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[m]));
-function cls(s){return /MALICIOUS|THREAT|FAILED|ERROR/.test(s)?"bad":/SUSPICIOUS|PENDING|REVIEW/.test(s)?"warn":/FOUND|ANALYZED|NO_MATCH|NO_EXISTING|NO_KNOWN/.test(s)?"good":"neutral"}
+function cls(s){return /MALICIOUS|THREAT|FAILED|ERROR/.test(s)?"bad":/SUSPICIOUS|PENDING|REVIEW|NO_EXISTING|NO_MATCH|REFRESH/.test(s)?"warn":/FOUND|ANALYZED|NO_KNOWN/.test(s)?"good":"neutral"}
 function prov(name,p){
   if(!p)return `<div class="provider"><b>${esc(name)}</b><span class="state neutral">NO DATA</span></div>`;
   const status=String(p.status||"UNKNOWN"); let detail=status.replaceAll("_"," ");
+  const refresh=String(p.refresh_status||"");
   if(name==="VirusTotal"&&(status==="FOUND"||status==="ANALYZED")){const x=p.stats||{};detail=`${x.malicious||0} malicious · ${x.suspicious||0} suspicious · ${x.harmless||0} harmless · ${x.undetected||0} undetected${status==="ANALYZED"?" · fresh analysis":""}`;}
   if(name==="RDAP"&&status==="FOUND")detail=`Registration ${p.registration?new Date(p.registration).toLocaleDateString():"unknown"} · ${p.nameservers?.length||0} nameservers · DNSSEC ${p.secure_dns?"signed":"not signed"}`;
-  if(name==="Dynamic Sandbox"&&status==="ANALYZED")detail=`${p.verdict||"ANALYZED"} · ${p.redirect_count||0} redirects · ${p.download_count||0} downloads · ${p.request_count||0} responses`;
+  if(name==="Dynamic Sandbox"&&status==="ANALYZED"){
+    detail=`${p.verdict||"ANALYZED"} · ${p.redirect_count||0} redirects · ${p.download_count||0} downloads · ${p.request_count||0} responses`;
+    if(p.final_url)detail+=` · final: ${p.final_url}`;
+    if(p.status_code)detail+=` · HTTP ${p.status_code}`;
+    if(Array.isArray(p.downloads)&&p.downloads.length)detail+=" · files: "+p.downloads.map(x=>`${x.filename||"file"} (${x.sha256||"no hash"} · ${x.size??"?"} bytes)`).join(", ");
+  }
   if(status==="ANALYSIS_PENDING")detail="VirusTotal accepted a fresh scan, but the analysis is still pending. Zero Trace does not treat pending data as clean.";
-  if(status==="REFRESH_FAILED")detail="Fresh VirusTotal analysis could not be started; the displayed report is existing provider evidence only.";
   if(status==="NO_EXISTING_REPORT")detail="No existing provider report; this is not proof of safety.";
   if(status==="NOT_CONFIGURED")detail="Provider key/configuration is not present.";
-  return `<div class="provider"><div><b>${esc(name)}</b><div class="src">${esc(detail)}</div></div><span class="state ${cls(status)}">${esc(status.replaceAll("_"," "))}</span></div>`;
+  if(refresh==="REFRESH_FAILED")detail+=" · fresh scan could not start; existing evidence only";
+  else if(refresh==="FRESH_SCAN_TIMEOUT_FALLBACK")detail+=" · fresh scan timed out; fallback report only";
+  else if(refresh==="FRESH_SCAN_TIMEOUT_NO_REPORT")detail+=" · fresh scan timed out; no existing report";
+  else if(refresh==="FRESH_SCAN_TIMEOUT_REPORT_ERROR")detail+=" · fresh scan timed out; report lookup failed";
+  const badge=(refresh?"STALE · ":"")+status.replaceAll("_"," ");
+  return `<div class="provider"><div><b>${esc(name)}</b><div class="src">${esc(detail)}</div></div><span class="state ${refresh?"warn":cls(status)}">${esc(badge)}</span></div>`;
 }
 async function session(controller){const r=await fetch(API+"/api/v1/browser-session",{method:"POST",credentials:"include",cache:"no-store",signal:controller.signal,headers:{Accept:"application/json","Cache-Control":"no-cache"}});if(!r.ok)throw Error("Secure scan session failed ("+r.status+").")}
 async function scan(u,token){if(activeController)activeController.abort();const controller=new AbortController();activeController=controller;const clientScanId="ZT-UI-"+Date.now().toString(36)+"-"+token;await session(controller);const r=await fetch(API+"/api/v1/browser-scan",{method:"POST",credentials:"include",cache:"no-store",signal:controller.signal,headers:{"Content-Type":"application/json",Accept:"application/json","Cache-Control":"no-cache"},body:JSON.stringify({url:u,client_scan_id:clientScanId})});const d=await r.json().catch(()=>({}));if(!r.ok)throw Error(d.detail||"Scan failed ("+r.status+").");if(token!==activeScanToken)throw Error("Scan superseded by a newer request.");return d}
-$("form").onsubmit=async e=>{e.preventDefault();const u=$("url").value.trim();if(!u)return;const token=++activeScanToken;const status=$("status"),statusText=$("statusText"),go=$("go");go.disabled=true;go.textContent="SCANNING…";$("result").classList.remove("show");clearInterval(scanTimer);setProgress(0);status.className="status show scan-active";statusText.textContent="SCANNING · ANALYZING LIVE EVIDENCE";scanTimer=setInterval(()=>{if(scanPct<90)setProgress(scanPct+Math.max(1,(90-scanPct)*0.08));},250);try{const payload=await scan(u,token);if(token!==activeScanToken)return;clearInterval(scanTimer);setProgress(100);await new Promise(r=>setTimeout(r,400));if(token!==activeScanToken)return;render(payload);status.className="status show done";statusText.textContent="SCAN COMPLETE · LIVE RESULTS READY";go.textContent="COMPLETED"}catch(x){if(x?.name==="AbortError"||token!==activeScanToken)return;clearInterval(scanTimer);setProgress(0);status.className="status show err";const msg=x?.message||"Unable to complete scan";const low=msg.toLowerCase();let friendly=msg;if(low.includes("failed to fetch"))friendly="Backend not reachable. Set the API URL with ?api=YOUR_HTTPS_BACKEND (current: "+API+") and ensure CORS allows this site.";else if(/scan failed \((502|503|504)\)/.test(low))friendly="Backend is starting (Render free tier cold start). Wait ~30s and retry. Current API: "+API;statusText.textContent="SCAN FAILED · "+friendly;go.textContent="DEEP SCAN"}finally{clearInterval(scanTimer);if(token===activeScanToken){go.disabled=false;activeController=null}}}
-$("url").addEventListener("input",()=>{if($("go").textContent!=="SCANNING…")$("go").textContent="DEEP SCAN";$("status").classList.remove("done");setProgress(0);});
+$("form").onsubmit=async e=>{
+  e.preventDefault();
+  const u=$("url").value.trim();
+  if(!u)return;
+  const token=++activeScanToken;
+  const status=$("status"),statusText=$("statusText"),go=$("go");
+  // Keep the button clickable so a user can replace an in-flight scan.
+  // The scan token + AbortController below make the older request a no-op.
+  go.textContent="SCAN NEW…";
+  $("result").classList.remove("show");
+  clearInterval(scanTimer);
+  setProgress(0);
+  status.className="status show scan-active";
+  statusText.textContent="SCANNING · ANALYZING LIVE EVIDENCE";
+  // Keep this timer local: an aborted older scan must not clear a newer scan's timer.
+  const thisTimer=setInterval(()=>{if(scanPct<90)setProgress(scanPct+Math.max(1,(90-scanPct)*0.08));},250);
+  scanTimer=thisTimer;
+  try{
+    const payload=await scan(u,token);
+    if(token!==activeScanToken)return;
+    clearInterval(thisTimer);setProgress(100);
+    await new Promise(r=>setTimeout(r,400));
+    if(token!==activeScanToken)return;
+    render(payload);
+    status.className="status show done";
+    statusText.textContent="SCAN COMPLETE · LIVE RESULTS READY";
+    go.textContent="COMPLETED";
+  }catch(x){
+    if(x?.name==="AbortError"||token!==activeScanToken)return;
+    clearInterval(thisTimer);setProgress(0);
+    status.className="status show err";
+    const msg=x?.message||"Unable to complete scan";
+    const low=msg.toLowerCase();
+    let friendly=msg;
+    if(low.includes("failed to fetch"))friendly="Backend not reachable. Set the API URL with ?api=YOUR_HTTPS_BACKEND (current: "+API+") and ensure CORS allows this site.";
+    else if(/scan failed \((502|503|504)\)/.test(low))friendly="Backend is starting (Render free tier cold start). Wait ~30s and retry. Current API: "+API;
+    statusText.textContent="SCAN FAILED · "+friendly;
+    go.textContent="DEEP SCAN";
+  }finally{
+    clearInterval(thisTimer);
+    if(token===activeScanToken){go.disabled=false;activeController=null;scanTimer=null;}
+  }
+};
+$("url").addEventListener("input",()=>{if($("go").textContent!=="SCAN NEW…")$("go").textContent="DEEP SCAN";$("status").classList.remove("done");setProgress(0);});
 function render(d){
   $("result").classList.add("show"); const s=d.summary||{}; const score=s.score;
-  $("verdict").textContent=s.verdict||"INSUFFICIENT EVIDENCE"; $("host").textContent=d.target?.url||""; $("score").textContent=score==null?"—":String(score)+"/100";
+  $("verdict").textContent=s.verdict||"INSUFFICIENT EVIDENCE"; $("host").textContent=d.target?.url||""; $("score").textContent=score==null?"—":String(score)+"/99";
   $("rec").innerHTML="<b>Recommendation:</b> "+esc(s.recommendation||"");
   const f=d.findings||[]; $("findings").innerHTML=f.length?f.map(x=>`<div class="finding"><div><span class="tag ${esc(x.severity)}">${esc(x.severity)}</span><b>${esc(x.title)}</b></div><p>${esc(x.detail)}</p><div class="src">${esc(x.source)}</div></div>`).join(""):"<div class='finding'><b>No threat finding returned</b><p>No provider or local finding crossed the scanner's configured thresholds.</p></div>";
   const p=d.providers||{}; $("providers").innerHTML=[prov("VirusTotal",p.VirusTotal),prov("RDAP",p.RDAP),prov("Dynamic Sandbox",p["Dynamic Sandbox"])].join("");

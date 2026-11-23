@@ -8,8 +8,6 @@ COPY sandbox ./sandbox
 COPY start.sh ./start.sh
 RUN chmod +x ./start.sh
 ENV SANDBOX_API_URL=http://127.0.0.1:8001
-ENV SANDBOX_API_KEY=change-me
-ENV ZERO_TRACE_API_KEY=change-me-zero-trace-secret
 ENV CORS_ORIGINS=https://manofrancis-dev.github.io
 ENV COOKIE_SECURE=true
 ENV BROWSER_SESSION_SAMESITE=none

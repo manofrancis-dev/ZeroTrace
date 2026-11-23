@@ -30,7 +30,7 @@ docker compose ps
 Invoke-RestMethod http://localhost:8000/health
 ```
 
-The sandbox should show `healthy` and the API should show `ok`.
+The sandbox should return `ok` and the API should show `ok` with `"sandbox": "ok"`. If the sandbox is unreachable, `/health` returns HTTP 503 with `"status": "degraded"`.
 
 ## Start the website
 
@@ -62,13 +62,11 @@ For each result, check **all provider cards**, not only the score. A `NO_EXISTIN
 
 ## Configuration
 
-Keep your existing values. Optional settings added by this build:
+Copy `backend/.env.example` to `backend/.env` and set real values. `ZERO_TRACE_API_KEY` signs browser session cookies and must be a strong random secret (placeholders are replaced by an ephemeral key at startup, which invalidates sessions on restart). `SANDBOX_API_KEY` is required: the sandbox rejects unauthenticated scan requests, so the API and worker must share the same value. `SANDBOX_TIMEOUT_SECONDS` (default 60) must exceed the worker's navigation and analysis budget. `RATE_LIMIT_PER_MINUTE` (default 20) throttles expensive scans per client address; enforce the same limit at the edge for multi-worker deployments.
 
-```text
-VT_SUBMIT_FILES=false
-```
+Downloaded files are hashed locally with SHA-256 and the hashes are shown in the sandbox provider card. Zero Trace does **not** upload downloaded files to VirusTotal and does **not** perform a VirusTotal file-hash lookup, which avoids silently publishing potentially sensitive files.
 
-This build performs VirusTotal file-hash lookup for downloaded APKs. It does not automatically upload downloaded files to VirusTotal unless you explicitly extend the deployment for that workflow. This avoids silently publishing potentially sensitive files.
+SSRF checks are applied both before the scan and to every browser request (including redirects and WebSockets). Because the browser performs its own DNS resolution, a DNS-rebinding domain can still change its answer between checks; deploy the sandbox on an isolated network as the final boundary.
 
 ## Score semantics
 

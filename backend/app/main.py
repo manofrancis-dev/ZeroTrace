@@ -7,34 +7,54 @@ import re
 import secrets
 import socket
 import time
+from collections import defaultdict, deque
 from datetime import datetime, timezone
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urlunparse
 
 import httpx
-from fastapi import FastAPI, Header, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from itsdangerous import BadSignature, URLSafeTimedSerializer
 from pydantic import BaseModel, Field
 
-API_KEY = os.getenv("ZERO_TRACE_API_KEY", "change-me")
-CORS_ORIGINS = [x.strip() for x in os.getenv("CORS_ORIGINS", "http://localhost:8080,http://127.0.0.1:8080").split(",") if x.strip()]
+def env_int(name, default):
+    try:
+        return int(os.getenv(name, str(default)))
+    except (TypeError, ValueError):
+        return default
+
+
+def env_float(name, default):
+    try:
+        return float(os.getenv(name, str(default)))
+    except (TypeError, ValueError):
+        return default
+
+
+API_KEY = os.getenv("ZERO_TRACE_API_KEY", "").strip()
+if not API_KEY or API_KEY.lower().startswith("change-me"):
+    # Never ship a forgeable default signing key. An ephemeral key keeps local
+    # development working, but sessions will not survive a restart.
+    API_KEY = secrets.token_urlsafe(32)
+    print("WARNING: ZERO_TRACE_API_KEY is missing or a placeholder; using an ephemeral secret. Set a persistent secret in deployment.")
+CORS_ORIGINS = [x.strip().rstrip("/") for x in os.getenv("CORS_ORIGINS", "http://localhost:8080,http://127.0.0.1:8080").split(",") if x.strip()]
 VT_KEY = os.getenv("VT_API_KEY", "").strip()
 VT_SUBMIT = os.getenv("VT_SUBMIT_NEW", "true").lower() == "true"
 VT_REANALYZE = os.getenv("VT_REANALYZE", "true").lower() == "true"
-VT_POLL_SECONDS = float(os.getenv("VT_POLL_SECONDS", "10"))
-VT_MAX_POLLS = min(2, max(1, int(os.getenv("VT_MAX_POLLS", "2"))))
-VT_SUBMIT_FILES = os.getenv("VT_SUBMIT_FILES", "false").lower() == "true"
-WR_KEY = os.getenv("WEBRISK_API_KEY", "").strip()
+VT_POLL_SECONDS = max(0.5, env_float("VT_POLL_SECONDS", 10))
+VT_MAX_POLLS = min(2, max(1, env_int("VT_MAX_POLLS", 2)))
 RDAP_ENABLED = os.getenv("RDAP_ENABLED", "true").lower() == "true"
 SANDBOX_ENABLED = os.getenv("SANDBOX_ENABLED", "true").lower() == "true"
 SANDBOX_URL = os.getenv("SANDBOX_API_URL", "http://sandbox:8001").rstrip("/")
 SANDBOX_KEY = os.getenv("SANDBOX_API_KEY", "")
-MAX_URL = int(os.getenv("MAX_URL_LENGTH", "2048"))
-SESSION_AGE = int(os.getenv("BROWSER_SESSION_MAX_AGE", "900"))
+SANDBOX_TIMEOUT = max(1.0, env_float("SANDBOX_TIMEOUT_SECONDS", 60))
+RATE_LIMIT_PER_MINUTE = env_int("RATE_LIMIT_PER_MINUTE", 20)
+MAX_URL = env_int("MAX_URL_LENGTH", 2048)
+SESSION_AGE = env_int("BROWSER_SESSION_MAX_AGE", 900)
 COOKIE_SECURE = os.getenv("COOKIE_SECURE", "false").lower() == "true"
-COOKIE_SAMESITE = os.getenv("BROWSER_SESSION_SAMESITE", os.getenv("BROWSER_SESSION_SAMESITE", "lax"))
-HTTP_TIMEOUT = float(os.getenv("HTTP_TIMEOUT_SECONDS", "12"))
+COOKIE_SAMESITE = os.getenv("BROWSER_SESSION_SAMESITE", "lax")
+HTTP_TIMEOUT = max(1.0, env_float("HTTP_TIMEOUT_SECONDS", 12))
 
 serializer = URLSafeTimedSerializer(API_KEY, salt="zero-trace-session")
 app = FastAPI(title="Zero Trace API", version="1.2.0")
@@ -57,6 +77,26 @@ async def no_store_scan_responses(request: Request, call_next):
     return response
 
 
+# Best-effort per-process throttle for the expensive scan endpoint. Deployments
+# with multiple workers should enforce this at the edge as well.
+_rate_buckets = defaultdict(deque)
+
+
+@app.middleware("http")
+async def scan_rate_limit(request: Request, call_next):
+    if RATE_LIMIT_PER_MINUTE > 0 and request.url.path == "/api/v1/browser-scan":
+        forwarded = request.headers.get("x-forwarded-for", "")
+        client_ip = forwarded.split(",")[0].strip() if forwarded else (request.client.host if request.client else "unknown")
+        bucket = _rate_buckets[client_ip]
+        now = time.monotonic()
+        while bucket and now - bucket[0] >= 60:
+            bucket.popleft()
+        if len(bucket) >= RATE_LIMIT_PER_MINUTE:
+            return JSONResponse({"detail": "Too many scans. Please wait a moment and retry."}, status_code=429)
+        bucket.append(now)
+    return await call_next(request)
+
+
 class ScanRequest(BaseModel):
     url: str = Field(min_length=1, max_length=MAX_URL)
     client_scan_id: str | None = Field(default=None, min_length=8, max_length=128)
@@ -64,15 +104,41 @@ class ScanRequest(BaseModel):
 
 def normalize(raw: str) -> str:
     value = raw.strip()
+    # Reject non-web schemes before the https:// fallback can disguise them.
+    scheme_match = re.match(r"^([A-Za-z][A-Za-z0-9+.-]*):(.*)$", value, re.S)
+    if scheme_match:
+        scheme = scheme_match.group(1).lower()
+        rest = scheme_match.group(2)
+        if rest.startswith("//"):
+            if scheme not in ("http", "https"):
+                raise ValueError("Only HTTP and HTTPS URLs are supported.")
+        elif scheme in ("http", "https") or not re.match(r"^\d", rest):
+            # A bare "host:port" has digits after the colon; anything else with
+            # a scheme-like prefix (javascript:, data:, mailto:, ...) is rejected.
+            raise ValueError("Only HTTP and HTTPS URLs are supported.")
     if not re.match(r"^[A-Za-z][A-Za-z0-9+.-]*://", value):
         value = "https://" + value
     parsed = urlparse(value)
     if parsed.scheme.lower() not in ("http", "https") or not parsed.hostname:
         raise ValueError("Only HTTP and HTTPS URLs are supported.")
-    if parsed.username or parsed.password:
-        # Keep the URL for analysis, but never request it from the sandbox.
-        return value
     return value
+
+
+def sandbox_target(url: str) -> str:
+    """Strip userinfo so browser credentials are never sent to the sandbox."""
+    parsed = urlparse(url)
+    if parsed.username or parsed.password:
+        return urlunparse(
+            (
+                parsed.scheme,
+                parsed.netloc.rsplit("@", 1)[-1],
+                parsed.path,
+                parsed.params,
+                parsed.query,
+                parsed.fragment,
+            )
+        )
+    return url
 
 
 def url_id(url: str) -> str:
@@ -83,21 +149,57 @@ def finding(out, severity, title, detail, source):
     out.append({"severity": severity, "title": title, "detail": detail, "source": source})
 
 
-def is_private_host(host: str) -> bool:
-    h = host.strip("[]").lower().rstrip(".")
-    if h in {"localhost", "localhost.localdomain", "ip6-localhost", "ip6-loopback"} or h.endswith(".local"):
+def safe_int(value, default=0):
+    try:
+        return int(value or 0)
+    except (TypeError, ValueError):
+        return default
+
+
+def _is_private_ip(ip) -> bool:
+    return (
+        ip.is_private
+        or ip.is_loopback
+        or ip.is_link_local
+        or ip.is_multicast
+        or ip.is_reserved
+        or ip.is_unspecified
+    )
+
+
+def _ip_is_private(value: str) -> bool:
+    h = value.strip("[]").lower().rstrip(".")
+    if not h:
         return True
     try:
-        ip = ipaddress.ip_address(h)
-        return ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_multicast or ip.is_reserved
+        return _is_private_ip(ipaddress.ip_address(h))
     except ValueError:
         pass
     try:
-        infos = socket.getaddrinfo(h, None)
-        return any(
-            (lambda ip: ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_multicast or ip.is_reserved)(ipaddress.ip_address(item[4][0]))
-            for item in infos
-        )
+        # Browsers accept shorthand, decimal, hex and octal IPv4 forms that
+        # ipaddress rejects and Windows getaddrinfo does not resolve.
+        return _is_private_ip(ipaddress.ip_address(socket.inet_aton(h)))
+    except (OSError, ValueError):
+        return False
+
+
+async def is_private_host(host: str) -> bool:
+    h = host.strip("[]").lower().rstrip(".")
+    if not h:
+        return True
+    if (
+        h in {"localhost", "localhost.localdomain", "ip6-localhost", "ip6-loopback"}
+        or h.endswith(".local")
+        or h.endswith(".internal")
+        or h.endswith(".test")
+    ):
+        return True
+    if _ip_is_private(h):
+        return True
+    try:
+        # Offload blocking DNS to a worker thread so the event loop is not stalled.
+        infos = await asyncio.to_thread(socket.getaddrinfo, h, None)
+        return any(_ip_is_private(item[4][0]) for item in infos)
     except Exception:
         return False
 
@@ -137,9 +239,6 @@ def local_checks(url: str):
     if re.search(r"\.(?:exe|scr|bat|cmd|msi|apk|dmg|iso)(?:$|[?#])", p.path, re.I):
         risk += 12
         finding(findings, "MEDIUM", "Downloadable executable path", "The URL path looks like a downloadable executable or package.", "Payload analysis")
-    if re.search(r"(?:javascript|data|file|blob):", url, re.I):
-        risk += 40
-        finding(findings, "CRITICAL", "Potentially unsafe URL scheme", "The URL uses a scheme outside normal web navigation.", "Scheme analysis")
     if re.search(r"(?:micros0ft|paypa[l1]|facebo0k|g00gle|app1e|amaz0n|netf1ix)", host, re.I):
         risk += 25
         finding(findings, "HIGH", "Lookalike brand token", "The hostname contains a common brand-impersonation pattern.", "Identity analysis")
@@ -147,12 +246,21 @@ def local_checks(url: str):
 
 
 def _vt_stats(report):
-    attrs = report.get("data", {}).get("attributes", {}) if isinstance(report, dict) else {}
-    stats = attrs.get("last_analysis_stats", {}) or {}
-    results = attrs.get("last_analysis_results", {}) or {}
+    data = (report or {}).get("data") if isinstance(report, dict) else None
+    data = data if isinstance(data, dict) else {}
+    attrs = data.get("attributes") or {}
+    attrs = attrs if isinstance(attrs, dict) else {}
+    stats = attrs.get("last_analysis_stats") or {}
+    results = attrs.get("last_analysis_results") or {}
+    if not isinstance(stats, dict):
+        stats = {}
+    if not isinstance(results, dict):
+        results = {}
     detections = []
     threat_names = []
     for engine, result in results.items():
+        if not isinstance(result, dict):
+            continue
         category = str(result.get("category", "")).lower()
         result_name = result.get("result") or "Detection"
         if category in {"malicious", "suspicious"}:
@@ -166,32 +274,35 @@ async def vt_url(client, url):
     """Run a fresh VirusTotal URL analysis when enabled, then return per-engine evidence.
 
     The public VirusTotal API is rate-limited, so Zero Trace deliberately keeps the
-    fresh-analysis path bounded: one scan submission/reanalysis plus at most three
-    analysis-status requests. If a fresh report cannot be completed, the response
-    says so instead of turning missing data into a clean verdict.
+    fresh-analysis path bounded: one scan submission/reanalysis plus at most two
+    analysis-status requests (VT_MAX_POLLS). If a fresh report cannot be completed,
+    the response says so instead of turning missing data into a clean verdict.
     """
     if not VT_KEY:
         return {"status": "NOT_CONFIGURED", "configured": False}
 
     headers = {"x-apikey": VT_KEY, "accept": "application/json"}
     try:
-        # Fresh scan path: reanalyse an existing URL identifier. If VT says the
-        # URL is unknown, submit the raw URL to create a new analysis.
-        if VT_SUBMIT and VT_REANALYZE:
-            submit = await client.post(
-                f"https://www.virustotal.com/api/v3/urls/{url_id(url)}/analyse",
-                headers=headers,
-            )
-            if submit.status_code == 404:
+        # Fresh scan path: reanalyse an existing URL identifier and/or submit a
+        # new URL. The two settings are independent.
+        if VT_SUBMIT or VT_REANALYZE:
+            submit = None
+            if VT_REANALYZE:
+                submit = await client.post(
+                    f"https://www.virustotal.com/api/v3/urls/{url_id(url)}/analyse",
+                    headers=headers,
+                )
+            if (submit is None or submit.status_code == 404) and VT_SUBMIT:
                 submit = await client.post(
                     "https://www.virustotal.com/api/v3/urls",
                     headers={**headers, "content-type": "application/x-www-form-urlencoded"},
                     data={"url": url},
                 )
-            if submit.status_code in (200, 201):
-                analysis_id = submit.json().get("data", {}).get("id")
+            submit_status = submit.status_code if submit is not None else None
+            if submit is not None and submit_status in (200, 201):
+                submit_data = submit.json().get("data")
+                analysis_id = (submit_data or {}).get("id") if isinstance(submit_data, dict) else None
                 if analysis_id:
-                    last_attrs = None
                     for poll_index in range(VT_MAX_POLLS):
                         # Spread the bounded status checks so slower VT analyses have
                         # time to complete without exceeding the public API request budget.
@@ -204,7 +315,6 @@ async def vt_url(client, url):
                         if analysis.status_code != 200:
                             continue
                         attrs = analysis.json().get("data", {}).get("attributes", {}) or {}
-                        last_attrs = attrs
                         if attrs.get("status") != "completed":
                             continue
                         results = attrs.get("results", {}) or {}
@@ -285,12 +395,12 @@ async def vt_url(client, url):
                     "last_analysis_date": attrs.get("last_analysis_date"),
                     "reputation": attrs.get("reputation"),
                     "refresh_status": "REFRESH_FAILED",
-                    "refresh_http_status": submit.status_code,
+                    "refresh_http_status": submit_status,
                     "meaning": "Existing VirusTotal URL report found, but a fresh analysis could not be started; this is not proof of safety.",
                 }
             if report.status_code == 404:
-                return {"status": "NO_EXISTING_REPORT", "configured": True, "refresh_status": "REFRESH_FAILED", "refresh_http_status": submit.status_code, "meaning": "VirusTotal has no usable URL report and the fresh scan could not be started."}
-            return {"status": "PROVIDER_ERROR", "configured": True, "http_status": submit.status_code}
+                return {"status": "NO_EXISTING_REPORT", "configured": True, "refresh_status": "REFRESH_FAILED", "refresh_http_status": submit_status, "meaning": "VirusTotal has no usable URL report and the fresh scan could not be started."}
+            return {"status": "PROVIDER_ERROR", "configured": True, "http_status": submit_status}
 
         # Compatibility path when fresh submissions are disabled: retrieve the
         # current URL report only. Missing reports remain explicit.
@@ -331,15 +441,18 @@ async def rdap(client, host):
         if r.status_code != 200:
             return {"status": "NO_RECORD", "configured": True, "http_status": r.status_code}
         d = r.json()
-        events = {x.get("eventAction"): x.get("eventDate") for x in d.get("events", []) if x.get("eventAction")}
-        nameservers = [x.get("ldhName") for x in d.get("nameservers", []) if x.get("ldhName")]
+        if not isinstance(d, dict):
+            return {"status": "NO_RECORD", "configured": True, "reason": "Unexpected RDAP response shape"}
+        events = {x.get("eventAction"): x.get("eventDate") for x in d.get("events", []) if isinstance(x, dict) and x.get("eventAction")}
+        nameservers = [x.get("ldhName") for x in d.get("nameservers", []) if isinstance(x, dict) and x.get("ldhName")]
+        secure_dns = d.get("secureDNS") or {}
         return {
             "status": "FOUND",
             "configured": True,
             "registration": events.get("registration"),
             "expiration": events.get("expiration"),
             "nameservers": nameservers,
-            "secure_dns": bool(d.get("secureDNS", {}).get("delegationSigned")),
+            "secure_dns": bool(secure_dns.get("delegationSigned")) if isinstance(secure_dns, dict) else False,
             "object_class": d.get("objectClassName"),
         }
     except Exception as exc:
@@ -354,7 +467,7 @@ async def sandbox(client, url):
             f"{SANDBOX_URL}/scan",
             json={"url": url},
             headers={"x-sandbox-key": SANDBOX_KEY},
-            timeout=float(os.getenv("SANDBOX_TIMEOUT_SECONDS", "23")),
+            timeout=SANDBOX_TIMEOUT,
         )
         if r.status_code != 200:
             return {"status": "PROVIDER_ERROR", "configured": True, "http_status": r.status_code}
@@ -368,38 +481,38 @@ def combine_score(base_score, findings, vt, sb):
     hard_threat = False
     strong_sources = 0
 
-    for source in (vt,):
-        stats = source.get("stats", {}) if source.get("status") in {"FOUND", "ANALYZED"} else {}
-        malicious = int(stats.get("malicious", 0) or 0)
-        suspicious = int(stats.get("suspicious", 0) or 0)
-        if malicious:
-            # A confirmed provider detection is decisive evidence. Keep the score
-            # low enough that a MALICIOUS verdict cannot visually resemble a clean
-            # result, while still leaving room for additional independent evidence.
-            risk += min(95, 45 + malicious * 12 + suspicious * 4)
-            hard_threat = True
-            strong_sources += 1
-        elif suspicious:
-            risk += min(45, 12 + suspicious * 6)
-            strong_sources += 1
-        if source.get("status") in {"FOUND", "ANALYZED"}:
-            strong_sources += 1
+    vt_live = vt.get("status") in {"FOUND", "ANALYZED"}
+    stats = vt.get("stats", {}) if vt_live else {}
+    malicious = safe_int(stats.get("malicious"))
+    suspicious = safe_int(stats.get("suspicious"))
+    if vt_live:
+        # One provider counts once, whether it is a clean report or a detection.
+        strong_sources += 1
+    if malicious:
+        # A confirmed provider detection is decisive evidence. Keep the score
+        # low enough that a MALICIOUS verdict cannot visually resemble a clean
+        # result, while still leaving room for additional independent evidence.
+        risk += min(95, 45 + malicious * 12 + suspicious * 4)
+        hard_threat = True
+    elif suspicious:
+        risk += min(45, 12 + suspicious * 6)
 
     malicious_signals = sb.get("malicious_signals", []) or []
     suspicious_signals = sb.get("suspicious_signals", []) or []
+    if sb.get("status") == "ANALYZED":
+        strong_sources += 1
     if malicious_signals:
         risk += min(65, 20 + 12 * len(malicious_signals))
         hard_threat = True
-        strong_sources += 1
     elif suspicious_signals:
         risk += min(35, 8 + 7 * len(suspicious_signals))
-        strong_sources += 1
-    if sb.get("download_count", 0):
-        risk += min(18, 6 + 4 * sb["download_count"])
+    downloads = safe_int(sb.get("download_count"))
+    if downloads:
+        risk += min(18, 6 + 4 * downloads)
 
     # Provider errors and missing reports do not count as safe evidence.
     score = max(0, min(99, round(100 - risk)))
-    reputation_live = vt.get("status") in {"FOUND", "ANALYZED"}
+    reputation_live = vt_live
     sandbox_live = sb.get("status") == "ANALYZED"
     # Coverage caps prevent sparse evidence from looking like a near-certainty.
     # RDAP is contextual intelligence, not a threat verdict, so it does not lift
@@ -416,7 +529,7 @@ def combine_score(base_score, findings, vt, sb):
     else:
         verdict = "NO KNOWN THREAT"
 
-    if strong_sources >= 3:
+    if strong_sources >= 2:
         confidence = "High"
     elif strong_sources >= 1:
         confidence = "Moderate"
@@ -428,16 +541,26 @@ def combine_score(base_score, findings, vt, sb):
 
 @app.get("/health")
 async def health():
-    return {
-        "status": "ok",
+    sandbox_state = "disabled"
+    if SANDBOX_ENABLED:
+        try:
+            async with httpx.AsyncClient(timeout=2.0) as probe:
+                r = await probe.get(f"{SANDBOX_URL}/health", headers={"x-sandbox-key": SANDBOX_KEY})
+                sandbox_state = "ok" if r.status_code == 200 else "unavailable"
+        except Exception:
+            sandbox_state = "unavailable"
+    content = {
+        "status": "ok" if sandbox_state != "unavailable" else "degraded",
         "service": "zero-trace",
         "version": "1.2.0",
+        "sandbox": sandbox_state,
         "providers": {
             "virustotal": bool(VT_KEY),
             "rdap": RDAP_ENABLED,
             "sandbox": SANDBOX_ENABLED,
         },
     }
+    return JSONResponse(content, status_code=200 if sandbox_state != "unavailable" else 503)
 
 
 @app.post("/api/v1/browser-session")
@@ -474,22 +597,24 @@ async def scan(req: ScanRequest, request: Request):
 
     parsed = urlparse(url)
     host = (parsed.hostname or "").lower().rstrip(".")
-    if is_private_host(host):
+    if await is_private_host(host):
         raise HTTPException(400, "Private, loopback, local, multicast, or reserved destinations are not scannable.")
 
     base_score, findings = local_checks(url)
+    # Never send URL-embedded credentials to external providers or the browser.
+    provider_url = sandbox_target(url)
     timeout = httpx.Timeout(HTTP_TIMEOUT, connect=min(6, HTTP_TIMEOUT))
     async with httpx.AsyncClient(timeout=timeout, follow_redirects=False, headers={"User-Agent": "ZeroTrace/1.1 Security Scanner"}) as client:
         vt_result, rdap_result, sandbox_result = await asyncio.gather(
-            vt_url(client, url),
+            vt_url(client, provider_url),
             rdap(client, host),
-            sandbox(client, url),
+            sandbox(client, provider_url),
         )
 
     if vt_result.get("status") in {"FOUND", "ANALYZED"}:
-        stats = vt_result.get("stats", {})
-        malicious = int(stats.get("malicious", 0) or 0)
-        suspicious = int(stats.get("suspicious", 0) or 0)
+        stats = vt_result.get("stats", {}) or {}
+        malicious = safe_int(stats.get("malicious"))
+        suspicious = safe_int(stats.get("suspicious"))
         if malicious:
             finding(findings, "CRITICAL", "VirusTotal malicious detections", f"{malicious} security engines marked the URL malicious.", "VirusTotal")
         elif suspicious:
@@ -507,7 +632,8 @@ async def scan(req: ScanRequest, request: Request):
         "RDAP": rdap_result,
         "Dynamic Sandbox": sandbox_result,
     }
-    reporting = sum(1 for x in providers.values() if x.get("status") not in {"NOT_CONFIGURED", "PROVIDER_ERROR", "NOT_APPLICABLE"})
+    non_reporting = {"NOT_CONFIGURED", "PROVIDER_ERROR", "NOT_APPLICABLE", "NO_EXISTING_REPORT", "ANALYSIS_PENDING", "NO_MATCH"}
+    reporting = sum(1 for x in providers.values() if x.get("status") not in non_reporting)
 
     if verdict == "MALICIOUS":
         recommendation = "Do not open or download from this URL. Treat the observed threat evidence as unsafe unless independently verified in a controlled environment."
@@ -515,6 +641,16 @@ async def scan(req: ScanRequest, request: Request):
         recommendation = "Avoid the URL until the flagged signals are independently verified. A suspicious result is not proof of malware, but it warrants caution."
     else:
         recommendation = "No known threat was found in the evidence available to Zero Trace. This score is evidence-based, not a probability or guarantee of future safety."
+
+    threat_agreement = 0
+    for provider in (vt_result, sandbox_result):
+        stats = provider.get("stats", {}) or {}
+        if (
+            provider.get("status") in {"MALICIOUS", "THREAT_FOUND"}
+            or safe_int(stats.get("malicious")) > 0
+            or bool(provider.get("malicious_signals"))
+        ):
+            threat_agreement += 1
 
     return {
         "scan_id": req.client_scan_id or ("ZT-" + hashlib.sha256((url + str(time.time_ns()) + str(session_claims.get("nonce"))).encode()).hexdigest()[:12].upper()),
@@ -536,6 +672,6 @@ async def scan(req: ScanRequest, request: Request):
         "correlation": {
             "reporting_providers": reporting,
             "available_provider_count": len(providers),
-            "threat_agreement": sum(1 for x in (vt_result, sandbox_result) if x.get("status") in {"THREAT_FOUND"} or int((x.get("stats") or {}).get("malicious", 0) or 0) > 0 or bool(x.get("malicious_signals"))),
+            "threat_agreement": threat_agreement,
         },
     }
