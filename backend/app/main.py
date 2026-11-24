@@ -361,24 +361,16 @@ async def vt_url(client, url):
                             "analysis_id": analysis_id,
                             "meaning": "Fresh VirusTotal analysis did not finish within the scan deadline; the current VirusTotal URL report is returned instead of a pending state.",
                         }
-                    if report.status_code == 404:
-                        return {
-                            "status": "NO_EXISTING_REPORT",
-                            "configured": True,
-                            "refresh_status": "FRESH_SCAN_TIMEOUT_NO_REPORT",
-                            "analysis_id": analysis_id,
-                            "meaning": "Fresh VirusTotal analysis did not finish within the scan deadline and no existing URL report is available.",
-                        }
+                    # report.status_code == 404: URL not in VT database
                     return {
-                        "status": "PROVIDER_ERROR",
+                        "status": "NO_EXISTING_REPORT",
                         "configured": True,
-                        "http_status": report.status_code,
-                        "refresh_status": "FRESH_SCAN_TIMEOUT_REPORT_ERROR",
+                        "refresh_status": "FRESH_SCAN_TIMEOUT_NO_REPORT",
                         "analysis_id": analysis_id,
+                        "meaning": "Fresh VirusTotal analysis did not finish within the scan deadline and no existing URL report is available.",
                     }
-
-            # Fresh scan could not be started. Fetch the existing report as a
-            # fallback, but label it as existing/stale evidence rather than fresh.
+            # Fresh scan could not be started (submit failed, invalid, or VT_SUBMIT disabled).
+            # Fetch the existing report as a fallback, but label it as existing/stale evidence.
             report = await client.get(
                 f"https://www.virustotal.com/api/v3/urls/{url_id(url)}",
                 headers=headers,
@@ -395,12 +387,12 @@ async def vt_url(client, url):
                     "last_analysis_date": attrs.get("last_analysis_date"),
                     "reputation": attrs.get("reputation"),
                     "refresh_status": "REFRESH_FAILED",
-                    "refresh_http_status": submit_status,
                     "meaning": "Existing VirusTotal URL report found, but a fresh analysis could not be started; this is not proof of safety.",
                 }
             if report.status_code == 404:
-                return {"status": "NO_EXISTING_REPORT", "configured": True, "refresh_status": "REFRESH_FAILED", "refresh_http_status": submit_status, "meaning": "VirusTotal has no usable URL report and the fresh scan could not be started."}
-            return {"status": "PROVIDER_ERROR", "configured": True, "http_status": submit_status}
+                return {"status": "NO_EXISTING_REPORT", "configured": True, "meaning": "VirusTotal has no usable URL report and the fresh scan could not be started."}
+            # Unknown HTTP status from VT - return PROVIDER_ERROR with available status info
+            return {"status": "PROVIDER_ERROR", "configured": True, "http_status": report.status_code, "meaning": "VirusTotal returned an unexpected HTTP status for the URL report query."}
 
         # Compatibility path when fresh submissions are disabled: retrieve the
         # current URL report only. Missing reports remain explicit.
@@ -485,8 +477,10 @@ def combine_score(base_score, findings, vt, sb):
     stats = vt.get("stats", {}) if vt_live else {}
     malicious = safe_int(stats.get("malicious"))
     suspicious = safe_int(stats.get("suspicious"))
-    if vt_live:
-        # One provider counts once, whether it is a clean report or a detection.
+    if vt_live and (malicious or suspicious):
+        # Only count as a strong source when VT actually provides detections
+        # (malicious or suspicious). A clean report does not independently raise
+        # confidence the way a threat finding does.
         strong_sources += 1
     if malicious:
         # A confirmed provider detection is decisive evidence. Keep the score
@@ -499,7 +493,8 @@ def combine_score(base_score, findings, vt, sb):
 
     malicious_signals = sb.get("malicious_signals", []) or []
     suspicious_signals = sb.get("suspicious_signals", []) or []
-    if sb.get("status") == "ANALYZED":
+    if sb.get("status") == "ANALYZED" and (malicious_signals or suspicious_signals):
+        # Only count sandbox as a strong source when it actually raises a signal.
         strong_sources += 1
     if malicious_signals:
         risk += min(65, 20 + 12 * len(malicious_signals))
@@ -605,11 +600,17 @@ async def scan(req: ScanRequest, request: Request):
     provider_url = sandbox_target(url)
     timeout = httpx.Timeout(HTTP_TIMEOUT, connect=min(6, HTTP_TIMEOUT))
     async with httpx.AsyncClient(timeout=timeout, follow_redirects=False, headers={"User-Agent": "ZeroTrace/1.1 Security Scanner"}) as client:
-        vt_result, rdap_result, sandbox_result = await asyncio.gather(
-            vt_url(client, provider_url),
-            rdap(client, host),
-            sandbox(client, provider_url),
-        )
+        try:
+            vt_result, rdap_result, sandbox_result = await asyncio.gather(
+                vt_url(client, provider_url),
+                rdap(client, host),
+                sandbox(client, provider_url),
+            )
+        except Exception as exc:
+            # Fallback: treat any unexpected gather-level exception as provider errors
+            vt_result = {"status": "PROVIDER_ERROR", "configured": True, "error": str(exc)[:180]}
+            rdap_result = {"status": "PROVIDER_ERROR", "configured": True, "error": str(exc)[:180]}
+            sandbox_result = {"status": "PROVIDER_ERROR", "configured": True, "error": str(exc)[:180]}
 
     if vt_result.get("status") in {"FOUND", "ANALYZED"}:
         stats = vt_result.get("stats", {}) or {}
