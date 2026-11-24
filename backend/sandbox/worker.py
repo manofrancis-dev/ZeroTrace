@@ -5,12 +5,12 @@ import os
 import socket
 from urllib.parse import urlparse
 
-from fastapi import FastAPI, Header, HTTPException
+from fastapi import FastAPI, Header, HTTPException, Request
 from pydantic import BaseModel, Field
 from playwright.async_api import async_playwright
 
 app = FastAPI(title="Zero Trace Dynamic Sandbox", version="1.1.1")
-KEY = os.getenv("SANDBOX_API_KEY", "")
+KEY = os.getenv("SANDBOX_API_KEY", "").strip()
 
 
 class Scan(BaseModel):
@@ -70,9 +70,28 @@ async def health():
     return {"status": "ok", "service": "zero-trace-sandbox", "version": "1.1.1"}
 
 
+def _authorized(request: Request, provided: str) -> bool:
+    if KEY:
+        return bool(provided) and provided.strip() == KEY
+    # No key configured. The worker is only reachable on loopback in the
+    # single-container image; allow that case so zero-config deployments work,
+    # but never accept remote callers without a configured key.
+    host = request.client.host if request.client else ""
+    return host in {"127.0.0.1", "::1", "localhost"}
+
+
+@app.get("/ready")
+async def ready(request: Request, x_sandbox_key: str = Header(default="")):
+    """Authenticated readiness probe used by the API health check so a key
+    mismatch is reported as degraded instead of silently looking healthy."""
+    if not _authorized(request, x_sandbox_key):
+        raise HTTPException(403, "Sandbox key is required and must be valid")
+    return {"status": "ok", "service": "zero-trace-sandbox", "version": "1.1.1"}
+
+
 @app.post("/scan")
-async def scan(q: Scan, x_sandbox_key: str = Header(default="")):
-    if not KEY or x_sandbox_key != KEY:
+async def scan(q: Scan, request: Request, x_sandbox_key: str = Header(default="")):
+    if not _authorized(request, x_sandbox_key):
         raise HTTPException(403, "Sandbox key is required and must be valid")
 
     redirects = []
@@ -147,7 +166,24 @@ async def scan(q: Scan, x_sandbox_key: str = Header(default="")):
     browser = None
     async with async_playwright() as p:
         try:
-            browser = await p.chromium.launch(headless=True, chromium_sandbox=False, args=["--disable-dev-shm-usage", "--no-first-run"])
+            base_args = [
+                "--disable-dev-shm-usage",
+                "--no-first-run",
+                "--disable-gpu",
+                "--disable-extensions",
+                "--mute-audio",
+            ]
+            try:
+                browser = await p.chromium.launch(headless=True, chromium_sandbox=False, args=base_args)
+            except Exception:
+                # Small containers (e.g. 512 MB) can fail to spawn the full
+                # Chromium process tree; retry in single-process mode before
+                # reporting the sandbox as unavailable.
+                browser = await p.chromium.launch(
+                    headless=True,
+                    chromium_sandbox=False,
+                    args=base_args + ["--single-process", "--no-zygote"],
+                )
             context = await browser.new_context(java_script_enabled=True, accept_downloads=True, ignore_https_errors=False)
             await context.route("**/*", block_private_requests)
             await context.route_web_socket("**/*", block_private_websockets)

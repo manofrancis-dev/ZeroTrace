@@ -30,7 +30,7 @@ docker compose ps
 Invoke-RestMethod http://localhost:8000/health
 ```
 
-The sandbox should return `ok` and the API should show `ok` with `"sandbox": "ok"`. If the sandbox is unreachable, `/health` returns HTTP 503 with `"status": "degraded"`.
+The sandbox should return `ok` and the API should show `ok` with `"sandbox": "ok"`. If the sandbox is unreachable, `/health` returns HTTP 503 with `"status": "degraded"`. If the API and sandbox keys do not match, `/health` returns HTTP 503 with `"sandbox": "unauthorized"` (the API checks an authenticated `/ready` probe, so a key mismatch can no longer masquerade as healthy).
 
 ## Start the website
 
@@ -62,7 +62,7 @@ For each result, check **all provider cards**, not only the score. A `NO_EXISTIN
 
 ## Configuration
 
-Copy `backend/.env.example` to `backend/.env` and set real values. `ZERO_TRACE_API_KEY` signs browser session cookies and must be a strong random secret (placeholders are replaced by an ephemeral key at startup, which invalidates sessions on restart). `SANDBOX_API_KEY` is required: the sandbox rejects unauthenticated scan requests, so the API and worker must share the same value. `SANDBOX_TIMEOUT_SECONDS` (default 60) must exceed the worker's navigation and analysis budget. `RATE_LIMIT_PER_MINUTE` (default 20) throttles expensive scans per client address; enforce the same limit at the edge for multi-worker deployments.
+Copy `backend/.env.example` to `backend/.env` and set real values. `ZERO_TRACE_API_KEY` signs browser session cookies and must be a strong random secret (placeholders are replaced by an ephemeral key at startup, which invalidates sessions on restart). `SANDBOX_API_KEY` is required: the sandbox rejects unauthenticated scan requests, so the API and worker must share the same value. In the single-container image (`start.sh`, used by `render.yaml` and `Dockerfile.render`) a missing `SANDBOX_API_URL`/`SANDBOX_API_KEY` is auto-configured inside the container, so a manually created Render service without env vars still works. `SANDBOX_TIMEOUT_SECONDS` (default 60) must exceed the worker's navigation and analysis budget. `RATE_LIMIT_PER_MINUTE` (default 20) throttles expensive scans per client address; enforce the same limit at the edge for multi-worker deployments.
 
 Downloaded files are hashed locally with SHA-256 and the hashes are shown in the sandbox provider card. Zero Trace does **not** upload downloaded files to VirusTotal and does **not** perform a VirusTotal file-hash lookup, which avoids silently publishing potentially sensitive files.
 

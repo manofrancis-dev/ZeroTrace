@@ -52,6 +52,7 @@ function prov(name,p){
   if(status==="ANALYSIS_PENDING")detail="VirusTotal accepted a fresh scan, but the analysis is still pending. Zero Trace does not treat pending data as clean.";
   if(status==="NO_EXISTING_REPORT")detail="No existing provider report; this is not proof of safety.";
   if(status==="NOT_CONFIGURED")detail="Provider key/configuration is not present.";
+  if(status==="PROVIDER_ERROR")detail=p.detail||p.error||("Provider request failed"+(p.http_status?" (HTTP "+p.http_status+")":"")+".");
   if(refresh==="REFRESH_FAILED")detail+=" · fresh scan could not start; existing evidence only";
   else if(refresh==="FRESH_SCAN_TIMEOUT_FALLBACK")detail+=" · fresh scan timed out; fallback report only";
   else if(refresh==="FRESH_SCAN_TIMEOUT_NO_REPORT")detail+=" · fresh scan timed out; no existing report";

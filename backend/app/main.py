@@ -47,7 +47,7 @@ VT_MAX_POLLS = min(2, max(1, env_int("VT_MAX_POLLS", 2)))
 RDAP_ENABLED = os.getenv("RDAP_ENABLED", "true").lower() == "true"
 SANDBOX_ENABLED = os.getenv("SANDBOX_ENABLED", "true").lower() == "true"
 SANDBOX_URL = os.getenv("SANDBOX_API_URL", "http://sandbox:8001").rstrip("/")
-SANDBOX_KEY = os.getenv("SANDBOX_API_KEY", "")
+SANDBOX_KEY = os.getenv("SANDBOX_API_KEY", "").strip()
 SANDBOX_TIMEOUT = max(1.0, env_float("SANDBOX_TIMEOUT_SECONDS", 60))
 RATE_LIMIT_PER_MINUTE = env_int("RATE_LIMIT_PER_MINUTE", 20)
 MAX_URL = env_int("MAX_URL_LENGTH", 2048)
@@ -462,7 +462,17 @@ async def sandbox(client, url):
             timeout=SANDBOX_TIMEOUT,
         )
         if r.status_code != 200:
-            return {"status": "PROVIDER_ERROR", "configured": True, "http_status": r.status_code}
+            detail = "Sandbox returned an unexpected HTTP status."
+            if r.status_code in (401, 403):
+                detail = f"Sandbox rejected the scan (HTTP {r.status_code}): SANDBOX_API_KEY is missing or does not match between the API and sandbox."
+            else:
+                try:
+                    body = r.json()
+                    if isinstance(body, dict) and body.get("detail"):
+                        detail = str(body["detail"])[:180]
+                except Exception:
+                    pass
+            return {"status": "PROVIDER_ERROR", "configured": True, "http_status": r.status_code, "detail": detail}
         return r.json()
     except Exception as exc:
         return {"status": "PROVIDER_ERROR", "configured": True, "error": str(exc)[:180]}
@@ -540,14 +550,24 @@ async def health():
     if SANDBOX_ENABLED:
         try:
             async with httpx.AsyncClient(timeout=2.0) as probe:
-                r = await probe.get(f"{SANDBOX_URL}/health", headers={"x-sandbox-key": SANDBOX_KEY})
-                sandbox_state = "ok" if r.status_code == 200 else "unavailable"
+                # /ready requires the shared key, so a missing or mismatched
+                # SANDBOX_API_KEY is reported as degraded instead of falsely
+                # appearing healthy while every scan is rejected with 403.
+                r = await probe.get(f"{SANDBOX_URL}/ready", headers={"x-sandbox-key": SANDBOX_KEY})
+                if r.status_code == 200:
+                    sandbox_state = "ok"
+                elif r.status_code in (401, 403):
+                    sandbox_state = "unauthorized"
+                else:
+                    sandbox_state = "unavailable"
         except Exception:
             sandbox_state = "unavailable"
+    healthy = sandbox_state in ("disabled", "ok")
     content = {
-        "status": "ok" if sandbox_state != "unavailable" else "degraded",
+        "status": "ok" if healthy else "degraded",
         "service": "zero-trace",
         "version": "1.2.0",
+        "build": (os.getenv("RENDER_GIT_COMMIT") or os.getenv("GIT_COMMIT") or "dev")[:12],
         "sandbox": sandbox_state,
         "providers": {
             "virustotal": bool(VT_KEY),
@@ -555,7 +575,7 @@ async def health():
             "sandbox": SANDBOX_ENABLED,
         },
     }
-    return JSONResponse(content, status_code=200 if sandbox_state != "unavailable" else 503)
+    return JSONResponse(content, status_code=200 if healthy else 503)
 
 
 @app.post("/api/v1/browser-session")
