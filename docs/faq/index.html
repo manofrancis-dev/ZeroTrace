@@ -1,0 +1,330 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Zero Trace FAQ: URL Scanner Questions Answered</title>
+  <meta name="description" content="Answers about Zero Trace URL scans, VirusTotal reports, RDAP data, sandbox analysis, score meaning, privacy, rate limits, and scan limitations.">
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <meta name="author" content="Mano Francis Dev">
+  <meta name="theme-color" content="#050a0e">
+  <link rel="canonical" href="https://manofrancis-dev.github.io/ZeroTrace/faq/">
+
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Zero Trace">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:title" content="Zero Trace FAQ: URL Scanner Questions Answered">
+  <meta property="og:description" content="Answers about URL scans, VirusTotal reports, RDAP data, sandbox analysis, score meaning, privacy, rate limits, and limitations.">
+  <meta property="og:url" content="https://manofrancis-dev.github.io/ZeroTrace/faq/">
+  <meta property="og:image" content="https://manofrancis-dev.github.io/ZeroTrace/assets/img/og-zero-trace-url-scanner.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Zero Trace wordmark on a dark cybersecurity grid with the headline Check a URL before you trust it.">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Zero Trace FAQ: URL Scanner Questions Answered">
+  <meta name="twitter:description" content="Answers about URL scans, VirusTotal reports, RDAP data, sandbox analysis, score meaning, privacy, rate limits, and limitations.">
+  <meta name="twitter:image" content="https://manofrancis-dev.github.io/ZeroTrace/assets/img/og-zero-trace-url-scanner.png">
+  <meta name="twitter:image:alt" content="Zero Trace wordmark on a dark cybersecurity grid with the headline Check a URL before you trust it.">
+
+  <link rel="icon" type="image/svg+xml" href="../assets/img/favicon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="../assets/img/favicon-32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="../assets/img/apple-touch-icon.png">
+  <link rel="stylesheet" href="../assets/css/site.css">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "FAQPage",
+        "@id": "https://manofrancis-dev.github.io/ZeroTrace/faq/#faq",
+        "url": "https://manofrancis-dev.github.io/ZeroTrace/faq/",
+        "name": "Zero Trace FAQ",
+        "description": "Answers about Zero Trace URL scans, evidence sources, scoring, privacy, and limitations.",
+        "inLanguage": "en",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "What is a URL security scanner?",
+            "acceptedAnswer": { "@type": "Answer", "text": "A URL security scanner checks a web address for evidence of phishing, malware, or other risk. Zero Trace combines reputation data, domain registration information, URL heuristics, and isolated browser behavior into one report. It is a decision aid, not a guarantee." }
+          },
+          {
+            "@type": "Question",
+            "name": "How does Zero Trace scan a URL?",
+            "acceptedAnswer": { "@type": "Answer", "text": "The backend validates the URL, blocks private and reserved destinations, strips URL credentials, and gathers evidence from VirusTotal and RDAP when configured. An isolated Chromium sandbox records redirects, HTTP status, downloads, and suspicious page signals. The scanner then correlates the findings into a 0 to 99 evidence-based score." }
+          },
+          {
+            "@type": "Question",
+            "name": "Can I scan any website?",
+            "acceptedAnswer": { "@type": "Answer", "text": "You can scan public HTTP and HTTPS URLs. Private, loopback, local, multicast, and reserved destinations are blocked by SSRF protection. Pages that require authentication, block automated browsers, or are only reachable inside a private network may not produce useful evidence. Scans are also rate-limited." }
+          },
+          {
+            "@type": "Question",
+            "name": "What do the verdicts mean?",
+            "acceptedAnswer": { "@type": "Answer", "text": "MALICIOUS means a provider or sandbox signal crossed the scanner's threat threshold. SUSPICIOUS means risk signals were observed but do not prove malware. NO KNOWN THREAT means no finding crossed the configured thresholds in the available evidence; it is not proof that the site is safe." }
+          },
+          {
+            "@type": "Question",
+            "name": "Is a high safety score a guarantee?",
+            "acceptedAnswer": { "@type": "Answer", "text": "No. The score is an evidence-based summary on a 0 to 99 scale, not a probability. A high score means fewer threat signals were observed in the available evidence at scan time. It does not guarantee that a site is honest or that it will remain safe." }
+          },
+          {
+            "@type": "Question",
+            "name": "What happens when no threat report exists?",
+            "acceptedAnswer": { "@type": "Answer", "text": "The report shows NO_EXISTING_REPORT or a similar coverage state. Zero Trace does not convert missing data into a safe verdict. The score is capped when reputation or browser evidence is unavailable, and the recommendation explains that evidence is limited." }
+          },
+          {
+            "@type": "Question",
+            "name": "Does Zero Trace use VirusTotal?",
+            "acceptedAnswer": { "@type": "Answer", "text": "Yes, when a VirusTotal API key is configured on the backend. The provider card shows whether VirusTotal was available, whether an existing report was found, and whether a fresh analysis completed. The public API is rate-limited, and submitted or queried URLs may be retained by VirusTotal under its terms." }
+          },
+          {
+            "@type": "Question",
+            "name": "Does Zero Trace store submitted URLs?",
+            "acceptedAnswer": { "@type": "Answer", "text": "Zero Trace does not maintain a scan-history database, and scan responses are marked no-store. The URL is still sent to the scanning backend and to third-party services used for the scan. When VirusTotal analysis is enabled, the URL is sent to VirusTotal, whose documentation says submitted or queried items may be added to its dataset. Hosting providers may keep operational logs. Do not scan private or confidential URLs." }
+          },
+          {
+            "@type": "Question",
+            "name": "Why can't I scan private or local URLs?",
+            "acceptedAnswer": { "@type": "Answer", "text": "Zero Trace rejects loopback, private, local, link-local, multicast, and reserved destinations before scanning. This SSRF protection prevents the scanner from being used to probe internal services. Authenticated and intranet pages are out of scope." }
+          },
+          {
+            "@type": "Question",
+            "name": "Is Zero Trace free?",
+            "acceptedAnswer": { "@type": "Answer", "text": "Yes. Zero Trace does not require an account or payment. The scan endpoint is rate-limited to protect the service and third-party provider quotas." }
+          }
+        ]
+      },
+      {
+        "@type": "WebPage",
+        "@id": "https://manofrancis-dev.github.io/ZeroTrace/faq/#webpage",
+        "url": "https://manofrancis-dev.github.io/ZeroTrace/faq/",
+        "name": "Zero Trace FAQ: URL Scanner Questions Answered",
+        "description": "Answers about Zero Trace URL scans, VirusTotal reports, RDAP data, sandbox analysis, score meaning, privacy, rate limits, and scan limitations.",
+        "isPartOf": { "@id": "https://manofrancis-dev.github.io/ZeroTrace/#website" },
+        "inLanguage": "en"
+      },
+      {
+        "@type": "BreadcrumbList",
+        "@id": "https://manofrancis-dev.github.io/ZeroTrace/faq/#breadcrumbs",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://manofrancis-dev.github.io/ZeroTrace/" },
+          { "@type": "ListItem", "position": 2, "name": "FAQ", "item": "https://manofrancis-dev.github.io/ZeroTrace/faq/" }
+        ]
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to main content</a>
+
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../" aria-label="Zero Trace home">
+        <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+          <rect x="1" y="1" width="30" height="30" rx="9" fill="#0a141b" stroke="#24414e"></rect>
+          <circle cx="16" cy="16" r="9" fill="none" stroke="#51e4ff" stroke-opacity=".28"></circle>
+          <circle cx="16" cy="16" r="5" fill="none" stroke="#51e4ff" stroke-opacity=".55"></circle>
+          <circle cx="16" cy="16" r="1.8" fill="#51e4ff"></circle>
+          <path d="M16 4v4M16 24v4M4 16h4M24 16h4" stroke="#51e4ff" stroke-opacity=".6" stroke-linecap="round"></path>
+        </svg>
+        <span>ZERO TRACE</span>
+      </a>
+      <div class="header-right">
+        <span class="header-badge">LIVE URL SECURITY INTELLIGENCE</span>
+        <nav class="site-nav" aria-label="Primary">
+          <a href="../features/">Features</a>
+          <a href="../how-it-works/">How it works</a>
+          <a href="../url-security-guide/">Security guide</a>
+          <a href="../phishing-detection/">Phishing</a>
+          <a href="../faq/" aria-current="page">FAQ</a>
+          <a href="../about/">About</a>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="section page-hero" aria-labelledby="page-title">
+      <div class="wrap">
+        <nav class="breadcrumbs" aria-label="Breadcrumb">
+          <ol>
+            <li><a href="../">Home</a></li>
+            <li aria-current="page">FAQ</li>
+          </ol>
+        </nav>
+        <p class="eyebrow">Frequently asked questions</p>
+        <h1 id="page-title">Zero Trace FAQ</h1>
+        <p class="lead">Straight answers about how the scanner works, what the results mean, which evidence sources are used, and where the limits are.</p>
+        <div class="page-meta"><span>Updated 27 November 2026</span><span>21 questions</span><span>Evidence-based answers</span></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="wrap">
+        <div class="prose" style="margin-bottom:34px">
+          <p>If you are looking for a quick answer, start with the <a href="../#results">scan result guide</a> or <a href="../#scanner">run a scan</a>. For a deeper explanation of the pipeline, read <a href="../how-it-works/">how Zero Trace scans a URL</a>.</p>
+        </div>
+
+        <h2>Scanning basics</h2>
+        <div class="faq" style="margin-bottom:34px">
+          <details>
+            <summary>What is a URL security scanner?</summary>
+            <div class="faq-answer"><p>A URL security scanner checks a web address for evidence of phishing, malware, or other risk. Zero Trace combines reputation data, domain registration information, URL heuristics, and isolated browser behavior into one report. It is a decision aid, not a guarantee.</p></div>
+          </details>
+          <details>
+            <summary>How does Zero Trace scan a URL?</summary>
+            <div class="faq-answer"><p>The backend validates the URL, blocks private and reserved destinations, strips URL credentials, and gathers evidence from VirusTotal and RDAP when configured. An isolated Chromium sandbox records redirects, HTTP status, downloads, and suspicious page signals. The scanner then correlates the findings into a 0–99 evidence-based score. The <a href="../how-it-works/">methodology page</a> explains each stage.</p></div>
+          </details>
+          <details>
+            <summary>How long does a scan take?</summary>
+            <div class="faq-answer"><p>Many scans complete in seconds, but a scan can take longer when VirusTotal performs a fresh analysis, the sandbox is slow, or the backend is waking from a cold start. The progress bar is an estimate, not a measurement. The result is shown only after the backend responds.</p></div>
+          </details>
+          <details>
+            <summary>Can I scan any website?</summary>
+            <div class="faq-answer"><p>You can scan public HTTP and HTTPS URLs. Private, loopback, local, multicast, and reserved destinations are blocked by SSRF protection. Pages that require authentication, block automated browsers, or are only reachable inside a private network may not produce useful evidence. Scans are also rate-limited to protect the service.</p></div>
+          </details>
+          <details>
+            <summary>Does Zero Trace scan downloaded files?</summary>
+            <div class="faq-answer"><p>The sandbox records download events, file names, sizes, and locally computed SHA-256 hashes. Zero Trace does not upload downloaded files to VirusTotal and does not perform a VirusTotal file-hash lookup. A download event is evidence to review, not a malware verdict by itself.</p></div>
+          </details>
+        </div>
+
+        <h2>Results and scoring</h2>
+        <div class="faq" style="margin-bottom:34px">
+          <details>
+            <summary>What do the verdicts mean?</summary>
+            <div class="faq-answer"><p><strong>MALICIOUS</strong> means a provider or sandbox signal crossed the scanner’s threat threshold. <strong>SUSPICIOUS</strong> means risk signals were observed but do not prove malware. <strong>NO KNOWN THREAT</strong> means no finding crossed the configured thresholds in the available evidence; it is not proof that the site is safe.</p></div>
+          </details>
+          <details>
+            <summary>Is a high safety score a guarantee?</summary>
+            <div class="faq-answer"><p>No. The score is an evidence-based summary on a 0–99 scale, not a probability. A high score means fewer threat signals were observed in the available evidence at scan time. It does not guarantee that a site is honest, that it will stay safe, or that it cannot phish you later.</p></div>
+          </details>
+          <details>
+            <summary>Why is the maximum score 99?</summary>
+            <div class="faq-answer"><p>Security evidence is always incomplete. New domains, cloaked pages, and provider gaps mean no scanner can honestly promise 100% safety. Zero Trace intentionally never returns 100 and caps the score when reputation or browser evidence is missing.</p></div>
+          </details>
+          <details>
+            <summary>What happens when no threat report exists?</summary>
+            <div class="faq-answer"><p>The report shows <code>NO_EXISTING_REPORT</code> or a similar coverage state. Zero Trace does not convert missing data into a safe verdict. The score is capped when reputation or browser evidence is unavailable, and the recommendation explains that evidence is limited.</p></div>
+          </details>
+          <details>
+            <summary>Why do providers show NOT_CONFIGURED or PROVIDER_ERROR?</summary>
+            <div class="faq-answer"><p><code>NOT_CONFIGURED</code> means the provider key or feature is not present on the backend. <code>PROVIDER_ERROR</code> means a provider request failed or was rate-limited. Both are coverage gaps. They are never treated as proof that a URL is safe.</p></div>
+          </details>
+          <details>
+            <summary>What does confidence mean?</summary>
+            <div class="faq-answer"><p>Confidence summarizes how many independent strong threat sources contributed findings. It is <strong>High</strong> when at least two strong sources did, <strong>Moderate</strong> when one did, and <strong>Limited</strong> when none did. It is not a probability and does not replace the provider cards.</p></div>
+          </details>
+        </div>
+
+        <h2>Evidence sources</h2>
+        <div class="faq" style="margin-bottom:34px">
+          <details>
+            <summary>Does Zero Trace use VirusTotal?</summary>
+            <div class="faq-answer"><p>Yes, when a VirusTotal API key is configured on the backend. The provider card shows whether VirusTotal was available, whether an existing report was found, and whether a fresh analysis completed. The public API is rate-limited, and submitted or queried URLs may be retained by VirusTotal under its terms.</p></div>
+          </details>
+          <details>
+            <summary>What does RDAP add?</summary>
+            <div class="faq-answer"><p>RDAP provides domain or IP registration context: registration and expiration events, nameservers, and DNSSEC delegation status when published. It helps you judge whether a domain is new or where its DNS is hosted. Registration age is context, not proof of guilt or innocence.</p></div>
+          </details>
+          <details>
+            <summary>What does the dynamic sandbox do?</summary>
+            <div class="faq-answer"><p>An isolated Chromium session opens the URL and records the final URL, redirects, HTTP status, page title, response count, download events, SHA-256 hashes, and suspicious page signals. It observes behavior that a static URL check cannot see. Some sites block automated browsers or serve different content to scanners, so the sandbox is one layer of evidence.</p></div>
+          </details>
+        </div>
+
+        <h2>Privacy and safety</h2>
+        <div class="faq" style="margin-bottom:34px">
+          <details>
+            <summary>Does Zero Trace store submitted URLs?</summary>
+            <div class="faq-answer"><p>Zero Trace does not maintain a scan-history database, and scan responses are marked no-store. The URL is still sent to the scanning backend and to third-party services used for the scan. When VirusTotal analysis is enabled, the URL is sent to VirusTotal, whose documentation says submitted or queried items may be added to its dataset. Hosting providers may keep operational logs. Do not scan private or confidential URLs. Read the <a href="../privacy/">privacy notes</a>.</p></div>
+          </details>
+          <details>
+            <summary>Is it safe to scan a suspicious link?</summary>
+            <div class="faq-answer"><p>Submitting a URL to Zero Trace does not open it in your browser. The backend and the isolated sandbox fetch it, and the URL may be sent to VirusTotal and RDAP. That is generally safer than opening a suspicious link yourself, but it is not risk-free for confidential URLs. Do not submit private, authenticated, or personal links.</p></div>
+          </details>
+          <details>
+            <summary>Why can’t I scan private or local URLs?</summary>
+            <div class="faq-answer"><p>Zero Trace rejects loopback, private, local, link-local, multicast, and reserved destinations before scanning. This SSRF protection prevents the scanner from being used to probe internal services. Authenticated and intranet pages are out of scope.</p></div>
+          </details>
+          <details>
+            <summary>Does Zero Trace replace antivirus?</summary>
+            <div class="faq-answer"><p>No. Zero Trace is a URL evidence tool, not an antivirus or endpoint protection product. It does not scan your device, monitor downloads continuously, or remove malware. Use it alongside updated software, multi-factor authentication, and a reputable security product.</p></div>
+          </details>
+        </div>
+
+        <h2>Using Zero Trace</h2>
+        <div class="faq" style="margin-bottom:34px">
+          <details>
+            <summary>Is Zero Trace free?</summary>
+            <div class="faq-answer"><p>Yes. Zero Trace does not require an account or payment. The scan endpoint is rate-limited to protect the service and third-party provider quotas.</p></div>
+          </details>
+          <details>
+            <summary>Who built Zero Trace?</summary>
+            <div class="faq-answer"><p>Zero Trace is an independent project built and maintained by <a href="../about/">Mano Francis Dev</a>. It is not affiliated with VirusTotal, Google, or any security vendor.</p></div>
+          </details>
+          <details>
+            <summary>How can I report a bug or security issue?</summary>
+            <div class="faq-answer"><p>For bugs and feature requests, open an issue on the <a href="https://github.com/manofrancis-dev/ZeroTrace" target="_blank" rel="noopener noreferrer">Zero Trace GitHub repository</a>. For a sensitive security report, do not post exploit details publicly; contact the maintainer through the GitHub profile so the issue can be handled privately.</p></div>
+          </details>
+        </div>
+
+        <div class="cta-band">
+          <div>
+            <p class="eyebrow">Still have a link?</p>
+            <h2>Check it with a live scan</h2>
+            <p>Read the findings, provider status, and coverage notes before you decide.</p>
+          </div>
+          <div class="cta-actions">
+            <a class="btn btn-primary" href="../#scanner">Scan a URL</a>
+            <a class="btn" href="../url-security-guide/">Read the guide</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <div class="footer-grid">
+        <div>
+          <a class="footer-brand" href="../" aria-label="Zero Trace home">
+            <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+              <rect x="1" y="1" width="30" height="30" rx="9" fill="#0a141b" stroke="#24414e"></rect>
+              <circle cx="16" cy="16" r="9" fill="none" stroke="#51e4ff" stroke-opacity=".28"></circle>
+              <circle cx="16" cy="16" r="5" fill="none" stroke="#51e4ff" stroke-opacity=".55"></circle>
+              <circle cx="16" cy="16" r="1.8" fill="#51e4ff"></circle>
+            </svg>
+            <span>ZERO TRACE</span>
+          </a>
+          <p class="footer-about">A free, evidence-based URL security scanner. Built by Mano Francis Dev to make link checking more transparent.</p>
+        </div>
+        <div class="footer-col">
+          <h2>Product</h2>
+          <a href="../features/">Features</a>
+          <a href="../how-it-works/">How it works</a>
+          <a href="../faq/">FAQ</a>
+        </div>
+        <div class="footer-col">
+          <h2>Learn</h2>
+          <a href="../url-security-guide/">URL security guide</a>
+          <a href="../phishing-detection/">Phishing detection</a>
+          <a href="../privacy/">Privacy &amp; data</a>
+        </div>
+        <div class="footer-col">
+          <h2>Project</h2>
+          <a href="../about/">About</a>
+          <a href="https://github.com/manofrancis-dev/ZeroTrace" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
+          <a href="https://manofrancis-dev.github.io/manofrancis-portfolio/" target="_blank" rel="noopener noreferrer">Portfolio ↗</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2026 Mano Francis Dev · Zero Trace</p>
+        <p class="footer-disclaimer">Independent project. Not affiliated with VirusTotal, Google, or any security vendor. A scan result is not a guarantee of future safety.</p>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

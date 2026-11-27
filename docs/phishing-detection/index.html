@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Phishing URL Checker: How to Spot a Phishing Link | Zero Trace</title>
+  <meta name="description" content="Use Zero Trace as a phishing URL checker. Learn how to spot lookalike domains, punycode, credential lures, redirects, and urgency tactics before you click.">
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <meta name="author" content="Mano Francis Dev">
+  <meta name="theme-color" content="#050a0e">
+  <link rel="canonical" href="https://manofrancis-dev.github.io/ZeroTrace/phishing-detection/">
+
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Zero Trace">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:title" content="Phishing URL Checker: How to Spot a Phishing Link | Zero Trace">
+  <meta property="og:description" content="Use Zero Trace as a phishing URL checker. Learn how to spot lookalike domains, punycode, credential lures, redirects, and urgency tactics before you click.">
+  <meta property="og:url" content="https://manofrancis-dev.github.io/ZeroTrace/phishing-detection/">
+  <meta property="og:image" content="https://manofrancis-dev.github.io/ZeroTrace/assets/img/og-zero-trace-url-scanner.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Zero Trace wordmark on a dark cybersecurity grid with the headline Check a URL before you trust it.">
+  <meta property="article:published_time" content="2026-11-27T00:00:00+00:00">
+  <meta property="article:modified_time" content="2026-11-27T00:00:00+00:00">
+  <meta property="article:author" content="Mano Francis Dev">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Phishing URL Checker: How to Spot a Phishing Link | Zero Trace">
+  <meta name="twitter:description" content="Use Zero Trace as a phishing URL checker. Learn how to spot lookalike domains, punycode, credential lures, redirects, and urgency tactics before you click.">
+  <meta name="twitter:image" content="https://manofrancis-dev.github.io/ZeroTrace/assets/img/og-zero-trace-url-scanner.png">
+  <meta name="twitter:image:alt" content="Zero Trace wordmark on a dark cybersecurity grid with the headline Check a URL before you trust it.">
+
+  <link rel="icon" type="image/svg+xml" href="../assets/img/favicon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="../assets/img/favicon-32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="../assets/img/apple-touch-icon.png">
+  <link rel="stylesheet" href="../assets/css/site.css">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Article",
+        "@id": "https://manofrancis-dev.github.io/ZeroTrace/phishing-detection/#article",
+        "headline": "How to identify a phishing URL",
+        "description": "Learn how to spot phishing URLs: lookalike domains, punycode, credential lures, redirects, and urgency tactics.",
+        "image": "https://manofrancis-dev.github.io/ZeroTrace/assets/img/og-zero-trace-url-scanner.png",
+        "datePublished": "2026-11-27",
+        "dateModified": "2026-11-27",
+        "inLanguage": "en",
+        "articleSection": "Phishing detection",
+        "author": { "@id": "https://manofrancis-dev.github.io/ZeroTrace/#person" },
+        "publisher": { "@id": "https://manofrancis-dev.github.io/ZeroTrace/#person" },
+        "mainEntityOfPage": { "@id": "https://manofrancis-dev.github.io/ZeroTrace/phishing-detection/#webpage" }
+      },
+      {
+        "@type": "WebPage",
+        "@id": "https://manofrancis-dev.github.io/ZeroTrace/phishing-detection/#webpage",
+        "url": "https://manofrancis-dev.github.io/ZeroTrace/phishing-detection/",
+        "name": "How to Identify a Phishing URL | Zero Trace",
+        "description": "Learn how to spot phishing URLs: lookalike domains, punycode, credential lures, redirects, and urgency tactics.",
+        "isPartOf": { "@id": "https://manofrancis-dev.github.io/ZeroTrace/#website" },
+        "inLanguage": "en"
+      },
+      {
+        "@type": "BreadcrumbList",
+        "@id": "https://manofrancis-dev.github.io/ZeroTrace/phishing-detection/#breadcrumbs",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://manofrancis-dev.github.io/ZeroTrace/" },
+          { "@type": "ListItem", "position": 2, "name": "Phishing detection", "item": "https://manofrancis-dev.github.io/ZeroTrace/phishing-detection/" }
+        ]
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to main content</a>
+
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../" aria-label="Zero Trace home">
+        <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+          <rect x="1" y="1" width="30" height="30" rx="9" fill="#0a141b" stroke="#24414e"></rect>
+          <circle cx="16" cy="16" r="9" fill="none" stroke="#51e4ff" stroke-opacity=".28"></circle>
+          <circle cx="16" cy="16" r="5" fill="none" stroke="#51e4ff" stroke-opacity=".55"></circle>
+          <circle cx="16" cy="16" r="1.8" fill="#51e4ff"></circle>
+          <path d="M16 4v4M16 24v4M4 16h4M24 16h4" stroke="#51e4ff" stroke-opacity=".6" stroke-linecap="round"></path>
+        </svg>
+        <span>ZERO TRACE</span>
+      </a>
+      <div class="header-right">
+        <span class="header-badge">LIVE URL SECURITY INTELLIGENCE</span>
+        <nav class="site-nav" aria-label="Primary">
+          <a href="../features/">Features</a>
+          <a href="../how-it-works/">How it works</a>
+          <a href="../url-security-guide/">Security guide</a>
+          <a href="../phishing-detection/" aria-current="page">Phishing</a>
+          <a href="../faq/">FAQ</a>
+          <a href="../about/">About</a>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="section page-hero" aria-labelledby="page-title">
+      <div class="wrap">
+        <nav class="breadcrumbs" aria-label="Breadcrumb">
+          <ol>
+            <li><a href="../">Home</a></li>
+            <li aria-current="page">Phishing detection</li>
+          </ol>
+        </nav>
+        <p class="eyebrow">Phishing detection</p>
+        <h1 id="page-title">How to identify a phishing URL</h1>
+        <p class="lead">Phishing works by borrowing trust: a familiar brand, an urgent message, and a link that looks close enough. Learning to read the URL is one of the most useful habits you can build.</p>
+        <div class="page-meta"><span>Updated 27 November 2026</span><span>Link checklist</span><span>Beginner friendly</span></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="wrap article-layout">
+        <article class="prose">
+          <p>Phishing is a form of impersonation. The attacker wants you to believe a page belongs to a service you trust so that you will enter a password, a one-time code, card details, or a recovery phrase. The page may be polished, the email may look official, and the connection may be encrypted. The URL is often the place where the impersonation becomes visible.</p>
+
+          <h2 id="goal">What a phishing URL is trying to do</h2>
+          <ul>
+            <li><strong>Steal credentials</strong> with a cloned login page.</li>
+            <li><strong>Capture one-time codes</strong> so an attacker can complete a login or transaction.</li>
+            <li><strong>Collect payment details</strong> through a fake shop, invoice, or delivery fee.</li>
+            <li><strong>Deliver malware</strong> through a fake installer, document, or update.</li>
+            <li><strong>Harvest personal information</strong> for identity theft or further targeting.</li>
+          </ul>
+          <p>Some phishing pages contain no malware at all. The fraud is in the page’s purpose, which is why a clean malware scan alone cannot prove that a site is trustworthy.</p>
+
+          <h2 id="anatomy">Anatomy of a phishing URL</h2>
+          <p>Consider this illustrative URL (the <code>example</code> domain is reserved for documentation):</p>
+          <blockquote><code>https://login.microsoft.com.account-verify.example/reset?email=you%40example.com</code></blockquote>
+          <p>Read it in parts:</p>
+          <ul>
+            <li><code>https://</code> is the scheme. It means the connection is encrypted, not that the site is honest.</li>
+            <li><code>login.microsoft.com.account-verify.example</code> is the host. The registrable domain is <code>example</code>. The words “login,” “microsoft,” and “account-verify” are subdomains chosen by the owner of <code>example</code>.</li>
+            <li><code>/reset</code> is the path. A brand name in the path does not prove ownership.</li>
+            <li><code>?email=...</code> is the query string. It can prefill a form or carry tracking data.</li>
+          </ul>
+          <p>The most important question is not “Does the URL contain a brand name?” It is “What is the registrable domain, and is it the domain I expect?”</p>
+
+          <h2 id="red-flags">Red flags in a suspicious link</h2>
+          <ol>
+            <li><strong>Lookalike characters.</strong> A zero for “o,” a one for “l,” or “rn” for “m” can make a fake domain look real.</li>
+            <li><strong>Brand names in subdomains or paths.</strong> <code>brand.example</code> is not <code>brand.com</code>.</li>
+            <li><strong>Hyphenated brand tokens.</strong> Names such as <code>brand-login</code> or <code>brand-secure</code> are common impersonation patterns.</li>
+            <li><strong>Punycode hostnames.</strong> A host containing <code>xn--</code> uses internationalized characters that may resemble Latin letters.</li>
+            <li><strong>Credential-style <code>@</code> syntax.</strong> In <code>https://trusted.example@evil.example/</code>, the actual host is <code>evil.example</code>.</li>
+            <li><strong>Long or random-looking strings.</strong> They can hide the meaningful part of the destination or carry a unique tracking token.</li>
+            <li><strong>Redirect parameters.</strong> Names such as <code>redirect</code>, <code>url</code>, <code>target</code>, <code>next</code>, and <code>continue</code> can send you elsewhere after the first page loads.</li>
+            <li><strong>Shortened links.</strong> A shortener hides the destination until it redirects.</li>
+            <li><strong>IP address hosts.</strong> A URL that points directly to an IP address instead of a domain is unusual for a consumer service.</li>
+            <li><strong>Executable downloads.</strong> A link ending in .exe, .scr, .bat, .cmd, .msi, .apk, .dmg, or .iso deserves extra scrutiny.</li>
+            <li><strong>Urgency and credential words.</strong> “Verify,” “password,” “wallet,” “reset,” “account,” and “payment” in the path or query are common lures.</li>
+            <li><strong>Mismatched link text.</strong> The visible text says one destination, but the actual href points somewhere else.</li>
+          </ol>
+          <p>No single red flag proves phishing. A combination of signals, especially in an unexpected message, is a reason to stop.</p>
+
+          <h2 id="lookalikes">Common lookalike domain techniques</h2>
+          <h3>Typosquatting</h3>
+          <p>A misspelling or omitted letter: <code>exmaple.example</code> instead of <code>example</code>. These are easy to miss when you scan quickly.</p>
+          <h3>Character substitution</h3>
+          <p>Digits or similar-looking letters replace the original: a zero for “o,” a one for “l,” or “vv” for “w.”</p>
+          <h3>Homoglyphs and punycode</h3>
+          <p>Characters from another script can look nearly identical to Latin letters. Browsers may display the Unicode form while the underlying hostname is punycode. If the address contains <code>xn--</code>, inspect it carefully.</p>
+          <h3>Combosquatting</h3>
+          <p>Extra words are added to a brand: <code>brand-support</code>, <code>brand-billing</code>, or <code>brand-verification</code>. The extra word is part of a different domain.</p>
+          <h3>Subdomain deception</h3>
+          <p>The brand appears in a subdomain: <code>brand.example</code>. The actual registrable domain is still <code>example</code>.</p>
+          <h3>TLD swaps</h3>
+          <p>The same name appears under a different top-level domain. A different TLD is not automatically malicious, but it is a reason to confirm the domain you expected.</p>
+
+          <h2 id="channels">Phishing beyond email</h2>
+          <ul>
+            <li><strong>SMS and messaging apps:</strong> delivery fees, bank alerts, account closures, and fake support conversations.</li>
+            <li><strong>QR codes:</strong> “quishing” hides the destination in a printed or screen-based code.</li>
+            <li><strong>Social media and direct messages:</strong> fake giveaways, investment offers, and account-verification requests.</li>
+            <li><strong>Search ads:</strong> paid results can point to lookalike domains above the official result.</li>
+            <li><strong>Browser notifications and calendar invites:</strong> fake alerts that lead to a credential page.</li>
+            <li><strong>Voice and video calls:</strong> impersonation that directs you to a link or a remote-support tool.</li>
+          </ul>
+
+          <h2 id="before">What to check before you click</h2>
+          <ol>
+            <li><strong>Pause on unexpected messages.</strong> If you did not initiate the interaction, verify it through an official channel.</li>
+            <li><strong>Reveal the destination.</strong> On desktop, hover over the link. On mobile, long-press and copy it instead of tapping.</li>
+            <li><strong>Read the registrable domain.</strong> Ignore brand names in subdomains and paths.</li>
+            <li><strong>Expand shortened links</strong> with a reputable tool or check the final URL in a scanner report.</li>
+            <li><strong>Scan the public URL</strong> with <a href="../#scanner">Zero Trace</a> and read the provider cards, not just the score.</li>
+            <li><strong>Open the official app or type the known address</strong> instead of using the link.</li>
+          </ol>
+
+          <h2 id="after">What to check after you open a page</h2>
+          <ul>
+            <li>Does the login form belong to the domain you expected?</li>
+            <li>Does the page ask for a password, one-time code, card PIN, or recovery phrase that the real service would not request there?</li>
+            <li>Does it push a payment method with no buyer protection?</li>
+            <li>Does it trigger a download you did not ask for?</li>
+            <li>Does the browser show a certificate or deceptive-site warning?</li>
+            <li>Does the page use urgency to stop you from checking?</li>
+          </ul>
+
+          <h2 id="https">Why HTTPS does not make a phishing page safe</h2>
+          <p>HTTPS encrypts traffic. It does not verify that the site is honest. Certificates are available to anyone who controls a domain, including attackers. A cloned login page served over HTTPS is still a cloned login page. The padlock is a baseline expectation, not a substitute for checking the domain and the context.</p>
+
+          <h2 id="zero-trace">How Zero Trace helps with phishing checks</h2>
+          <p>Zero Trace looks for phishing-related evidence from several angles: URL structure heuristics, VirusTotal reputation and engine detections, RDAP registration context, and isolated browser behavior such as redirects and suspicious page signals. The report shows which providers responded and where evidence is missing.</p>
+          <p>It cannot confirm every phishing page. A new domain may have no report, and a targeted page may serve different content to a scanner. Treat a “no known threat” result as a reason for normal caution, not as permission to enter credentials. Read <a href="../features/">the feature breakdown</a> for the full evidence model.</p>
+
+          <h2 id="clicked">If you clicked: immediate steps</h2>
+          <ol>
+            <li>Do not enter any information on the page.</li>
+            <li>Close the tab and stop any download that started.</li>
+            <li>If you entered a password, change it from a device you trust and revoke active sessions.</li>
+            <li>Enable multi-factor authentication on the affected account.</li>
+            <li>If payment details were entered, contact your bank or card issuer using the official number or app.</li>
+            <li>Run a security scan on the device if you downloaded or opened a file.</li>
+            <li>Report the message to the platform where you received it.</li>
+          </ol>
+          <p>The <a href="../url-security-guide/#entered">URL security guide</a> covers account recovery steps in more detail.</p>
+
+          <h2 id="report">Reporting a phishing link</h2>
+          <p>Reporting helps browsers, platforms, and authorities warn others. Use the report option in the app or email client where you received the message, and consider these official reporting routes:</p>
+          <ul>
+            <li><a href="https://safebrowsing.google.com/safebrowsing/report_phish/" target="_blank" rel="noopener noreferrer">Google Safe Browsing phishing report</a></li>
+            <li><a href="https://www.cisa.gov/secure-our-world/recognize-and-report-phishing" target="_blank" rel="noopener noreferrer">CISA phishing guidance and reporting</a></li>
+            <li><a href="https://reportfraud.ftc.gov/" target="_blank" rel="noopener noreferrer">FTC fraud reporting portal</a></li>
+          </ul>
+
+          <h2 id="checklist">Quick phishing URL checklist</h2>
+          <ul>
+            <li>Is the registrable domain exactly what I expect?</li>
+            <li>Are there lookalike characters, punycode, or a hyphenated brand token?</li>
+            <li>Does the link contain credential or urgency lures?</li>
+            <li>Is it shortened, redirected, or pointing to an IP address?</li>
+            <li>Did the message arrive unexpectedly or pressure me to act?</li>
+            <li>Have I checked independent evidence instead of trusting the logo?</li>
+            <li>Am I about to enter a secret that the real service would not ask for here?</li>
+          </ul>
+          <p>If any answer raises doubt, stop and verify through the official app or a known address.</p>
+
+          <div class="author-box">
+            <div class="author-avatar" aria-hidden="true">MF</div>
+            <p><b>Written and maintained by Mano Francis Dev.</b> This guide is part of the independent <a href="../about/">Zero Trace</a> project. It is educational content, not professional security advice.</p>
+          </div>
+        </article>
+
+        <aside class="article-aside" aria-label="On this page">
+          <h2>On this page</h2>
+          <ul>
+            <li><a href="#goal">What phishing wants</a></li>
+            <li><a href="#anatomy">URL anatomy</a></li>
+            <li><a href="#red-flags">Red flags</a></li>
+            <li><a href="#lookalikes">Lookalike domains</a></li>
+            <li><a href="#channels">Phishing channels</a></li>
+            <li><a href="#before">Before you click</a></li>
+            <li><a href="#after">After you open</a></li>
+            <li><a href="#zero-trace">How Zero Trace helps</a></li>
+            <li><a href="#clicked">If you clicked</a></li>
+            <li><a href="#checklist">Quick checklist</a></li>
+          </ul>
+          <a class="aside-cta" href="../#scanner">Scan a URL →</a>
+        </aside>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="wrap">
+        <div class="cta-band">
+          <div>
+            <p class="eyebrow">Check the link</p>
+            <h2>Not sure about a URL?</h2>
+            <p>Scan a public link and review the evidence before you enter anything.</p>
+          </div>
+          <div class="cta-actions">
+            <a class="btn btn-primary" href="../#scanner">Scan a URL</a>
+            <a class="btn" href="../url-security-guide/">Website safety guide</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <div class="footer-grid">
+        <div>
+          <a class="footer-brand" href="../" aria-label="Zero Trace home">
+            <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+              <rect x="1" y="1" width="30" height="30" rx="9" fill="#0a141b" stroke="#24414e"></rect>
+              <circle cx="16" cy="16" r="9" fill="none" stroke="#51e4ff" stroke-opacity=".28"></circle>
+              <circle cx="16" cy="16" r="5" fill="none" stroke="#51e4ff" stroke-opacity=".55"></circle>
+              <circle cx="16" cy="16" r="1.8" fill="#51e4ff"></circle>
+            </svg>
+            <span>ZERO TRACE</span>
+          </a>
+          <p class="footer-about">A free, evidence-based URL security scanner. Built by Mano Francis Dev to make link checking more transparent.</p>
+        </div>
+        <div class="footer-col">
+          <h2>Product</h2>
+          <a href="../features/">Features</a>
+          <a href="../how-it-works/">How it works</a>
+          <a href="../faq/">FAQ</a>
+        </div>
+        <div class="footer-col">
+          <h2>Learn</h2>
+          <a href="../url-security-guide/">URL security guide</a>
+          <a href="../phishing-detection/">Phishing detection</a>
+          <a href="../privacy/">Privacy &amp; data</a>
+        </div>
+        <div class="footer-col">
+          <h2>Project</h2>
+          <a href="../about/">About</a>
+          <a href="https://github.com/manofrancis-dev/ZeroTrace" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
+          <a href="https://manofrancis-dev.github.io/manofrancis-portfolio/" target="_blank" rel="noopener noreferrer">Portfolio ↗</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2026 Mano Francis Dev · Zero Trace</p>
+        <p class="footer-disclaimer">Independent project. Not affiliated with VirusTotal, Google, or any security vendor. A scan result is not a guarantee of future safety.</p>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

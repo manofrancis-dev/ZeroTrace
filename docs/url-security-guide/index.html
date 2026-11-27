@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>How to Check If a Website Is Safe (2026 Guide) | Zero Trace</title>
+  <meta name="description" content="A practical guide to checking whether a website is safe: inspect the URL, verify the domain, spot phishing signs, and interpret scanner results correctly.">
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <meta name="author" content="Mano Francis Dev">
+  <meta name="theme-color" content="#050a0e">
+  <link rel="canonical" href="https://manofrancis-dev.github.io/ZeroTrace/url-security-guide/">
+
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Zero Trace">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:title" content="How to Check If a Website Is Safe (2026 Guide) | Zero Trace">
+  <meta property="og:description" content="Inspect the URL, verify the domain, spot phishing signs, and interpret scanner results correctly.">
+  <meta property="og:url" content="https://manofrancis-dev.github.io/ZeroTrace/url-security-guide/">
+  <meta property="og:image" content="https://manofrancis-dev.github.io/ZeroTrace/assets/img/og-zero-trace-url-scanner.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Zero Trace wordmark on a dark cybersecurity grid with the headline Check a URL before you trust it.">
+  <meta property="article:published_time" content="2026-11-27T00:00:00+00:00">
+  <meta property="article:modified_time" content="2026-11-27T00:00:00+00:00">
+  <meta property="article:author" content="Mano Francis Dev">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="How to Check If a Website Is Safe (2026 Guide) | Zero Trace">
+  <meta name="twitter:description" content="Inspect the URL, verify the domain, spot phishing signs, and interpret scanner results correctly.">
+  <meta name="twitter:image" content="https://manofrancis-dev.github.io/ZeroTrace/assets/img/og-zero-trace-url-scanner.png">
+  <meta name="twitter:image:alt" content="Zero Trace wordmark on a dark cybersecurity grid with the headline Check a URL before you trust it.">
+
+  <link rel="icon" type="image/svg+xml" href="../assets/img/favicon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="../assets/img/favicon-32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="../assets/img/apple-touch-icon.png">
+  <link rel="stylesheet" href="../assets/css/site.css">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Article",
+        "@id": "https://manofrancis-dev.github.io/ZeroTrace/url-security-guide/#article",
+        "headline": "How to check whether a website is safe",
+        "description": "A practical guide to checking whether a website is safe: inspect the URL, verify the domain, spot phishing signs, and interpret scanner results correctly.",
+        "image": "https://manofrancis-dev.github.io/ZeroTrace/assets/img/og-zero-trace-url-scanner.png",
+        "datePublished": "2026-11-27",
+        "dateModified": "2026-11-27",
+        "inLanguage": "en",
+        "articleSection": "URL security",
+        "author": { "@id": "https://manofrancis-dev.github.io/ZeroTrace/#person" },
+        "publisher": { "@id": "https://manofrancis-dev.github.io/ZeroTrace/#person" },
+        "mainEntityOfPage": { "@id": "https://manofrancis-dev.github.io/ZeroTrace/url-security-guide/#webpage" }
+      },
+      {
+        "@type": "WebPage",
+        "@id": "https://manofrancis-dev.github.io/ZeroTrace/url-security-guide/#webpage",
+        "url": "https://manofrancis-dev.github.io/ZeroTrace/url-security-guide/",
+        "name": "How to Check If a Website Is Safe (2026 Guide) | Zero Trace",
+        "description": "A practical guide to checking whether a website is safe: inspect the URL, verify the domain, spot phishing signs, and interpret scanner results correctly.",
+        "isPartOf": { "@id": "https://manofrancis-dev.github.io/ZeroTrace/#website" },
+        "inLanguage": "en"
+      },
+      {
+        "@type": "BreadcrumbList",
+        "@id": "https://manofrancis-dev.github.io/ZeroTrace/url-security-guide/#breadcrumbs",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://manofrancis-dev.github.io/ZeroTrace/" },
+          { "@type": "ListItem", "position": 2, "name": "URL security guide", "item": "https://manofrancis-dev.github.io/ZeroTrace/url-security-guide/" }
+        ]
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to main content</a>
+
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../" aria-label="Zero Trace home">
+        <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+          <rect x="1" y="1" width="30" height="30" rx="9" fill="#0a141b" stroke="#24414e"></rect>
+          <circle cx="16" cy="16" r="9" fill="none" stroke="#51e4ff" stroke-opacity=".28"></circle>
+          <circle cx="16" cy="16" r="5" fill="none" stroke="#51e4ff" stroke-opacity=".55"></circle>
+          <circle cx="16" cy="16" r="1.8" fill="#51e4ff"></circle>
+          <path d="M16 4v4M16 24v4M4 16h4M24 16h4" stroke="#51e4ff" stroke-opacity=".6" stroke-linecap="round"></path>
+        </svg>
+        <span>ZERO TRACE</span>
+      </a>
+      <div class="header-right">
+        <span class="header-badge">LIVE URL SECURITY INTELLIGENCE</span>
+        <nav class="site-nav" aria-label="Primary">
+          <a href="../features/">Features</a>
+          <a href="../how-it-works/">How it works</a>
+          <a href="../url-security-guide/" aria-current="page">Security guide</a>
+          <a href="../phishing-detection/">Phishing</a>
+          <a href="../faq/">FAQ</a>
+          <a href="../about/">About</a>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="section page-hero" aria-labelledby="page-title">
+      <div class="wrap">
+        <nav class="breadcrumbs" aria-label="Breadcrumb">
+          <ol>
+            <li><a href="../">Home</a></li>
+            <li aria-current="page">URL security guide</li>
+          </ol>
+        </nav>
+        <p class="eyebrow">URL security guide</p>
+        <h1 id="page-title">How to check whether a website is safe</h1>
+        <p class="lead">A padlock is not a safety certificate, and a familiar logo is not proof of identity. Use this practical checklist to judge a link before you enter a password, payment detail, or personal information.</p>
+        <div class="page-meta"><span>Updated 27 November 2026</span><span>Practical checklist</span><span>Beginner friendly</span></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="wrap article-layout">
+        <article class="prose">
+          <p>“Is this website safe?” is rarely a yes-or-no question. Safety depends on who operates the site, what it asks you to do, how you arrived, and what evidence exists at the moment you check. A site can be legitimate but compromised, new but honest, or old and malicious. The goal is not certainty. The goal is to gather enough evidence to make a cautious decision.</p>
+
+          <h2 id="url">Start with the URL, not the page</h2>
+          <p>The address bar is the most reliable identity signal you have, but only if you read it correctly. Browsers display the full URL in different ways, and mobile browsers often hide parts of it. Copy the link into a notes app or a scanner if you need to inspect it carefully.</p>
+          <h3>Read the domain from right to left</h3>
+          <p>The registrable domain is the label immediately before the public suffix, such as <code>example.com</code> in <code>login.example.com</code>. In <code>paypal.com.account-check.example</code>, the actual domain is <code>example</code>, not PayPal. Everything to the left of the registrable domain is a subdomain that the domain owner controls.</p>
+          <h3>Watch for lookalike characters</h3>
+          <p>Attackers use zeroes for the letter “o,” the letters “rn” for “m,” and hyphenated brand words such as <code>brand-login</code>. Internationalized domain names can render characters that look like Latin letters; a hostname containing <code>xn--</code> is punycode and deserves a closer look.</p>
+          <h3>Inspect the path and query string</h3>
+          <p>Brand names in the path do not prove ownership. A URL like <code>https://example.com/paypal/login</code> is still hosted on <code>example.com</code>. Query parameters named <code>redirect</code>, <code>url</code>, <code>target</code>, <code>next</code>, or <code>continue</code> can send you somewhere else after the first page loads.</p>
+          <h3>Treat shortened links as opaque</h3>
+          <p>A short link hides its destination. Expand it with a reputable tool or paste it into a scanner before opening it. The same applies to QR codes: the printed code tells you nothing about the URL it contains.</p>
+
+          <h2 id="checklist">The 10-point website safety checklist</h2>
+          <ol>
+            <li><strong>Is the domain spelled correctly?</strong> Check every character, not just the logo.</li>
+            <li><strong>Is the registrable domain the one you expect?</strong> Ignore subdomains and paths that contain a brand name.</li>
+            <li><strong>Does it use HTTPS?</strong> This is a minimum expectation, not proof of honesty.</li>
+            <li><strong>Is the domain newly registered?</strong> RDAP registration dates add context, especially for payment or login pages.</li>
+            <li><strong>Does the URL contain credential or urgency lures?</strong> Words such as verify, password, wallet, reset, and confirm are common in phishing.</li>
+            <li><strong>Does the link redirect?</strong> A redirect chain can hide the final destination. Check where it ends.</li>
+            <li><strong>Does the page ask for information it should not need?</strong> A delivery tracking page should not need your banking password.</li>
+            <li><strong>Are ownership and contact details clear?</strong> Missing contact information is a caution sign, not proof of fraud.</li>
+            <li><strong>Do independent sources report threats?</strong> Reputation, sandbox behavior, and URL structure are more useful together than alone.</li>
+            <li><strong>Does the context make sense?</strong> An unexpected message asking you to log in is a risk even if the domain looks familiar.</li>
+          </ol>
+
+          <h2 id="https">What HTTPS does and does not prove</h2>
+          <p>HTTPS encrypts the connection between your browser and the website. It prevents someone on the network from reading or modifying the page in transit. It does not prove that the site owner is honest, that the business exists, or that the page will not steal your credentials.</p>
+          <p>Certificates are widely available. Phishing sites routinely use HTTPS and can copy a login page closely. The padlock is a baseline expectation, not a trust decision. A missing padlock is a reason to stop; a present padlock is not a reason to proceed without other checks.</p>
+
+          <h2 id="scan">How to use a URL scanner correctly</h2>
+          <p>A scanner adds evidence, but it cannot make the decision for you. Use it as one input alongside the URL inspection and the context of the message.</p>
+          <ol>
+            <li><strong>Paste the actual destination.</strong> If a link is shortened, expand it first or scan the short link and check the final URL in the report.</li>
+            <li><strong>Use a public URL.</strong> Do not submit private, authenticated, or confidential links to third-party services.</li>
+            <li><strong>Read the provider cards.</strong> A score without coverage information is easy to misread.</li>
+            <li><strong>Look for missing evidence.</strong> <code>NO_EXISTING_REPORT</code>, <code>NOT_CONFIGURED</code>, and <code>PROVIDER_ERROR</code> are coverage gaps, not clean results.</li>
+            <li><strong>Do not treat a high score as permission.</strong> A high score means fewer observed threat signals, not a guarantee.</li>
+            <li><strong>Rescan if the site changes.</strong> A page can be modified after a scan, and a fresh domain can accumulate reports quickly.</li>
+          </ol>
+          <p>You can <a href="../#scanner">run a live Zero Trace scan</a> and read the provider status alongside the findings.</p>
+
+          <h2 id="results">How to interpret scanner results</h2>
+          <ul>
+            <li><strong>MALICIOUS:</strong> a provider or sandbox signal crossed the threat threshold. Do not open the link or download files from it.</li>
+            <li><strong>SUSPICIOUS:</strong> risk signals were observed, but they do not prove malware. Avoid credentials and payment details until you verify the destination.</li>
+            <li><strong>NO KNOWN THREAT:</strong> no finding crossed the configured thresholds in the available evidence. This is not proof of safety.</li>
+            <li><strong>NO_EXISTING_REPORT:</strong> the reputation provider had no report. The scanner treats this as missing evidence.</li>
+            <li><strong>PROVIDER_ERROR / NOT_CONFIGURED:</strong> a provider failed or was unavailable. Confidence should be lower.</li>
+            <li><strong>Score 0–99:</strong> an evidence summary, not a probability. A score of 100 is intentionally never returned.</li>
+          </ul>
+          <p>Read the <a href="../#results">full explanation of scan results</a> or the <a href="../faq/">Zero Trace FAQ</a> for more detail.</p>
+
+          <h2 id="page-signs">Red flags on the page after you open it</h2>
+          <ul>
+            <li>A login form on a domain you did not expect, especially after clicking a message link.</li>
+            <li>A request for a one-time code, full password, card PIN, or recovery phrase outside the service’s official app.</li>
+            <li>Payment methods with no buyer protection, such as bank transfer, gift cards, or cryptocurrency, on an unfamiliar shop.</li>
+            <li>A download prompt for an executable, installer, or archive you did not ask for.</li>
+            <li>Browser warnings about a deceptive site or an invalid certificate.</li>
+            <li>Countdown timers, account-closure threats, or “final warning” language designed to rush you.</li>
+            <li>Missing contact details, inconsistent branding, or links that lead to unrelated domains.</li>
+          </ul>
+          <p>Grammar and design alone are weak signals. Some phishing pages are polished and error-free, while some legitimate small-business sites are poorly designed. Use them as context, not as a verdict.</p>
+
+          <h2 id="dangerous">What to do if a link looks dangerous</h2>
+          <ol>
+            <li><strong>Do not open it.</strong> If you already have it open, close the tab.</li>
+            <li><strong>Do not enter credentials, payment details, or one-time codes.</strong></li>
+            <li><strong>Do not download files or grant permissions.</strong></li>
+            <li><strong>Verify through an official channel.</strong> Open the service’s app or type its known address directly.</li>
+            <li><strong>Report the message</strong> to the platform where you received it and, where appropriate, to the relevant authority.</li>
+            <li><strong>Warn others</strong> who may have received the same link.</li>
+          </ol>
+
+          <h2 id="entered">What to do if you already entered credentials</h2>
+          <p>Act quickly and use a device you trust. Change the password for the affected account, then change any other account that reused the same password. Revoke active sessions if the service supports it, enable multi-factor authentication, and check recent account activity. If payment details were entered, contact your bank or card issuer using the number on the card or the official app, not a number from the suspicious page.</p>
+          <p>For reporting guidance, see <a href="https://www.cisa.gov/recognize-and-report-phishing" target="_blank" rel="noopener noreferrer">CISA’s phishing guidance</a> and the <a href="https://consumer.ftc.gov/articles/how-recognize-and-avoid-phishing-scams" target="_blank" rel="noopener noreferrer">FTC’s phishing article</a>. Reporting does not undo a compromise, but it helps platforms and authorities respond.</p>
+
+          <h2 id="limits">A note on scanner limitations</h2>
+          <p>No scanner can see every version of every page. Some sites block automated browsers, serve different content by location or device, or stay clean until a campaign begins. Reputation providers may have no report for a new domain, and a provider can be rate-limited or unavailable. That is why Zero Trace reports coverage explicitly and caps the score when evidence is missing.</p>
+          <p>Use a scan as one layer of defense. Keep software updated, use multi-factor authentication, avoid reusing passwords, and treat unexpected links with suspicion.</p>
+
+          <h2 id="quick-answer">Quick answer: is this website safe?</h2>
+          <p>If the domain is spelled correctly, the registrable domain is the one you expect, the link arrived in a context that makes sense, the page does not ask for unnecessary secrets, and independent evidence shows no threat, you have reasonable grounds to proceed with normal caution. If any of those checks fail, stop and verify through an official channel. “No known threat” is not the same as “safe.”</p>
+
+          <div class="author-box">
+            <div class="author-avatar" aria-hidden="true">MF</div>
+            <p><b>Written and maintained by Mano Francis Dev.</b> This guide is part of the independent <a href="../about/">Zero Trace</a> project. It is educational content, not professional security advice. For a specific incident, contact a qualified security professional.</p>
+          </div>
+        </article>
+
+        <aside class="article-aside" aria-label="On this page">
+          <h2>On this page</h2>
+          <ul>
+            <li><a href="#url">Read the URL</a></li>
+            <li><a href="#checklist">10-point checklist</a></li>
+            <li><a href="#https">HTTPS limits</a></li>
+            <li><a href="#scan">Using a scanner</a></li>
+            <li><a href="#results">Interpreting results</a></li>
+            <li><a href="#page-signs">Page red flags</a></li>
+            <li><a href="#dangerous">If a link is dangerous</a></li>
+            <li><a href="#entered">If credentials were entered</a></li>
+            <li><a href="#limits">Scanner limits</a></li>
+          </ul>
+          <a class="aside-cta" href="../#scanner">Scan a URL →</a>
+        </aside>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="wrap">
+        <div class="cta-band">
+          <div>
+            <p class="eyebrow">Check before you click</p>
+            <h2>Put the checklist into practice</h2>
+            <p>Run a public URL through Zero Trace and read the evidence, not just the score.</p>
+          </div>
+          <div class="cta-actions">
+            <a class="btn btn-primary" href="../#scanner">Scan a URL</a>
+            <a class="btn" href="../phishing-detection/">Spot phishing links</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <div class="footer-grid">
+        <div>
+          <a class="footer-brand" href="../" aria-label="Zero Trace home">
+            <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+              <rect x="1" y="1" width="30" height="30" rx="9" fill="#0a141b" stroke="#24414e"></rect>
+              <circle cx="16" cy="16" r="9" fill="none" stroke="#51e4ff" stroke-opacity=".28"></circle>
+              <circle cx="16" cy="16" r="5" fill="none" stroke="#51e4ff" stroke-opacity=".55"></circle>
+              <circle cx="16" cy="16" r="1.8" fill="#51e4ff"></circle>
+            </svg>
+            <span>ZERO TRACE</span>
+          </a>
+          <p class="footer-about">A free, evidence-based URL security scanner. Built by Mano Francis Dev to make link checking more transparent.</p>
+        </div>
+        <div class="footer-col">
+          <h2>Product</h2>
+          <a href="../features/">Features</a>
+          <a href="../how-it-works/">How it works</a>
+          <a href="../faq/">FAQ</a>
+        </div>
+        <div class="footer-col">
+          <h2>Learn</h2>
+          <a href="../url-security-guide/">URL security guide</a>
+          <a href="../phishing-detection/">Phishing detection</a>
+          <a href="../privacy/">Privacy &amp; data</a>
+        </div>
+        <div class="footer-col">
+          <h2>Project</h2>
+          <a href="../about/">About</a>
+          <a href="https://github.com/manofrancis-dev/ZeroTrace" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
+          <a href="https://manofrancis-dev.github.io/manofrancis-portfolio/" target="_blank" rel="noopener noreferrer">Portfolio ↗</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2026 Mano Francis Dev · Zero Trace</p>
+        <p class="footer-disclaimer">Independent project. Not affiliated with VirusTotal, Google, or any security vendor. A scan result is not a guarantee of future safety.</p>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

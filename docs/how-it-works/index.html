@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>How URL Scanning Works | Zero Trace</title>
+  <meta name="description" content="Follow a Zero Trace scan from URL validation and SSRF protection to VirusTotal, RDAP, isolated browser analysis, and evidence-based scoring.">
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <meta name="author" content="Mano Francis Dev">
+  <meta name="theme-color" content="#050a0e">
+  <link rel="canonical" href="https://manofrancis-dev.github.io/ZeroTrace/how-it-works/">
+
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Zero Trace">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:title" content="How URL Scanning Works | Zero Trace">
+  <meta property="og:description" content="From URL validation and SSRF protection to VirusTotal, RDAP, isolated browser analysis, and evidence-based scoring.">
+  <meta property="og:url" content="https://manofrancis-dev.github.io/ZeroTrace/how-it-works/">
+  <meta property="og:image" content="https://manofrancis-dev.github.io/ZeroTrace/assets/img/og-zero-trace-url-scanner.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Zero Trace wordmark on a dark cybersecurity grid with the headline Check a URL before you trust it.">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="How URL Scanning Works | Zero Trace">
+  <meta name="twitter:description" content="From URL validation and SSRF protection to VirusTotal, RDAP, isolated browser analysis, and evidence-based scoring.">
+  <meta name="twitter:image" content="https://manofrancis-dev.github.io/ZeroTrace/assets/img/og-zero-trace-url-scanner.png">
+  <meta name="twitter:image:alt" content="Zero Trace wordmark on a dark cybersecurity grid with the headline Check a URL before you trust it.">
+
+  <link rel="icon" type="image/svg+xml" href="../assets/img/favicon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="../assets/img/favicon-32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="../assets/img/apple-touch-icon.png">
+  <link rel="stylesheet" href="../assets/css/site.css">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebPage",
+        "@id": "https://manofrancis-dev.github.io/ZeroTrace/how-it-works/#webpage",
+        "url": "https://manofrancis-dev.github.io/ZeroTrace/how-it-works/",
+        "name": "How URL Scanning Works | Zero Trace",
+        "description": "Follow a Zero Trace scan from URL validation and SSRF protection to VirusTotal, RDAP, isolated browser analysis, and evidence-based scoring.",
+        "isPartOf": { "@id": "https://manofrancis-dev.github.io/ZeroTrace/#website" },
+        "inLanguage": "en"
+      },
+      {
+        "@type": "BreadcrumbList",
+        "@id": "https://manofrancis-dev.github.io/ZeroTrace/how-it-works/#breadcrumbs",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://manofrancis-dev.github.io/ZeroTrace/" },
+          { "@type": "ListItem", "position": 2, "name": "How it works", "item": "https://manofrancis-dev.github.io/ZeroTrace/how-it-works/" }
+        ]
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to main content</a>
+
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../" aria-label="Zero Trace home">
+        <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+          <rect x="1" y="1" width="30" height="30" rx="9" fill="#0a141b" stroke="#24414e"></rect>
+          <circle cx="16" cy="16" r="9" fill="none" stroke="#51e4ff" stroke-opacity=".28"></circle>
+          <circle cx="16" cy="16" r="5" fill="none" stroke="#51e4ff" stroke-opacity=".55"></circle>
+          <circle cx="16" cy="16" r="1.8" fill="#51e4ff"></circle>
+          <path d="M16 4v4M16 24v4M4 16h4M24 16h4" stroke="#51e4ff" stroke-opacity=".6" stroke-linecap="round"></path>
+        </svg>
+        <span>ZERO TRACE</span>
+      </a>
+      <div class="header-right">
+        <span class="header-badge">LIVE URL SECURITY INTELLIGENCE</span>
+        <nav class="site-nav" aria-label="Primary">
+          <a href="../features/">Features</a>
+          <a href="../how-it-works/" aria-current="page">How it works</a>
+          <a href="../url-security-guide/">Security guide</a>
+          <a href="../phishing-detection/">Phishing</a>
+          <a href="../faq/">FAQ</a>
+          <a href="../about/">About</a>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="section page-hero" aria-labelledby="page-title">
+      <div class="wrap">
+        <nav class="breadcrumbs" aria-label="Breadcrumb">
+          <ol>
+            <li><a href="../">Home</a></li>
+            <li aria-current="page">How it works</li>
+          </ol>
+        </nav>
+        <p class="eyebrow">Scanning methodology</p>
+        <h1 id="page-title">How Zero Trace scans a URL</h1>
+        <p class="lead">A scan is a sequence of checks, not a single lookup. This page explains what happens after you press “Deep Scan,” what each provider contributes, and where the evidence can be incomplete.</p>
+        <div class="page-meta"><span>Updated 27 November 2026</span><span>5-stage pipeline</span><span>Bounded scan window</span></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="wrap article-layout">
+        <article class="prose">
+          <p>Zero Trace is a server-side URL analysis application. The browser interface collects the URL; the backend validates it, queries external services, runs an isolated browser, and returns a structured report. The frontend does not replace a failed live scan with a local guess.</p>
+
+          <h2 id="validation">Step 1 — URL validation and SSRF protection</h2>
+          <p>The backend first normalizes the input and restricts it to HTTP or HTTPS. It rejects scheme-like values such as <code>javascript:</code>, <code>data:</code>, and <code>mailto:</code>. It also enforces a maximum URL length and requires a hostname.</p>
+          <p>Before any provider or sandbox request, the host is checked for private, loopback, local, link-local, multicast, and reserved addresses. The check resolves the hostname and rejects destinations that resolve into those ranges. This is SSRF protection: it prevents the scanner from being used to probe internal services.</p>
+          <p>If the URL contains a username or password, those credentials are stripped before the URL is sent to VirusTotal, RDAP, or the browser sandbox. The scan endpoint also requires a signed, short-lived session cookie and is rate-limited per client address.</p>
+
+          <h2 id="virustotal">Step 2 — VirusTotal reputation</h2>
+          <p>When a VirusTotal API key is configured, Zero Trace looks for an existing URL report. If fresh submission or reanalysis is enabled, it asks VirusTotal to analyze the URL again and polls a bounded number of times. The public API has request limits, so the fresh-analysis window is intentionally short.</p>
+          <p>If the fresh analysis completes, the report includes per-engine detections and statistics. If it does not complete, Zero Trace falls back to the current URL report when one exists and labels the result as fallback evidence. If no report exists, the provider state is <code>NO_EXISTING_REPORT</code>. A pending analysis is never presented as clean.</p>
+          <p>VirusTotal’s documentation says submitted or queried items may be added to its dataset. That is why Zero Trace tells users not to scan confidential URLs.</p>
+
+          <h2 id="rdap">Step 3 — RDAP registration lookup</h2>
+          <p>Zero Trace queries RDAP for the domain or IP address behind the URL. The report can include registration and expiration events, nameservers, and DNSSEC delegation status. RDAP is contextual evidence: a new domain is not automatically malicious, and an old domain is not automatically safe.</p>
+          <p>RDAP responses vary by registry. Some fields may be redacted or absent. If the lookup fails, the provider card reports <code>PROVIDER_ERROR</code> or <code>NO_RECORD</code> instead of inventing registration data.</p>
+
+          <h2 id="sandbox">Step 4 — Isolated browser analysis</h2>
+          <p>The URL is opened in an isolated Chromium sandbox. The sandbox records the final URL after redirects, redirect count, HTTP status, page title, response count, download events, file names, sizes, and locally computed SHA-256 hashes. It also reports suspicious page signals that its analysis is configured to detect.</p>
+          <p>SSRF checks are applied before the scan and to browser requests, including redirects and WebSockets. Because the browser performs its own DNS resolution, a DNS-rebinding domain could still change its answer between checks. The sandbox network isolation is the final boundary.</p>
+          <p>Websites can block automated browsers or serve different content to scanners. A sandbox result is therefore one layer of evidence, not a complete view of what every visitor will see.</p>
+
+          <h2 id="correlation">Step 5 — Findings and evidence correlation</h2>
+          <p>The backend combines local URL heuristics, VirusTotal detections, and sandbox signals. Each finding has a severity, title, detail, and source. The score starts from the local URL analysis and applies risk for observed provider and sandbox signals.</p>
+          <p>Coverage caps keep sparse evidence from looking like certainty. If neither reputation nor browser evidence is available, the score cannot exceed 85. If only one is available, it cannot exceed 94. A score of 100 is intentionally never returned. The verdict is <code>MALICIOUS</code>, <code>SUSPICIOUS</code>, or <code>NO KNOWN THREAT</code>, and the recommendation explains what to do next.</p>
+
+          <h2 id="progress">What the progress bar means</h2>
+          <p>The progress bar is an estimate, not a measurement of backend work. It advances while the request is in flight and reaches 100% when the response arrives. A scan can take longer than the animation suggests, especially when VirusTotal is performing a fresh analysis or the backend is waking from a cold start. The result is only shown after the backend responds.</p>
+
+          <h2 id="failures">Why scans can fail or return limited evidence</h2>
+          <ul>
+            <li><strong>Provider not configured:</strong> a missing API key produces <code>NOT_CONFIGURED</code>, not a clean result.</li>
+            <li><strong>Provider error or rate limit:</strong> the card reports <code>PROVIDER_ERROR</code> with available status information.</li>
+            <li><strong>No existing report:</strong> the card reports <code>NO_EXISTING_REPORT</code> and the score is capped.</li>
+            <li><strong>Sandbox blocked:</strong> some sites reject automated browsers or serve different content.</li>
+            <li><strong>Private destination:</strong> private, loopback, local, multicast, and reserved hosts are rejected by design.</li>
+            <li><strong>Cold start:</strong> a hosted backend may need time to wake. Retry after a short wait.</li>
+          </ul>
+
+          <h2 id="repeated">Repeated scans</h2>
+          <p>Every scan creates a fresh browser session and a unique client scan ID. API responses are marked no-store. You can scan one URL, refresh the page, paste a different URL, and repeat the cycle without reusing the previous result. The frontend aborts an older in-flight request when you start a new scan.</p>
+
+          <h2 id="architecture">Architecture at a glance</h2>
+          <div class="table-wrap">
+            <table>
+              <caption>Zero Trace components</caption>
+              <thead>
+                <tr><th scope="col">Layer</th><th scope="col">Technology</th><th scope="col">Role</th></tr>
+              </thead>
+              <tbody>
+                <tr><th scope="row">Website</th><td>HTML, CSS, JavaScript on GitHub Pages</td><td>Collects the URL, calls the API, renders the report.</td></tr>
+                <tr><th scope="row">API</th><td>Python FastAPI</td><td>Validates input, enforces sessions and rate limits, coordinates providers, scores evidence.</td></tr>
+                <tr><th scope="row">Browser sandbox</th><td>Isolated Chromium worker</td><td>Observes redirects, page behavior, and downloads in a contained environment.</td></tr>
+                <tr><th scope="row">Evidence</th><td>VirusTotal and RDAP</td><td>Reputation and registration context, with explicit coverage states.</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="author-box">
+            <div class="author-avatar" aria-hidden="true">MF</div>
+            <p><b>Methodology maintained by Mano Francis Dev.</b> The scanner is designed to report gaps honestly. Read <a href="../features/">the feature breakdown</a>, <a href="../privacy/">privacy notes</a>, or <a href="../faq/">the FAQ</a>.</p>
+          </div>
+        </article>
+
+        <aside class="article-aside" aria-label="On this page">
+          <h2>On this page</h2>
+          <ul>
+            <li><a href="#validation">Validation &amp; SSRF</a></li>
+            <li><a href="#virustotal">VirusTotal</a></li>
+            <li><a href="#rdap">RDAP</a></li>
+            <li><a href="#sandbox">Browser sandbox</a></li>
+            <li><a href="#correlation">Correlation</a></li>
+            <li><a href="#progress">Progress bar</a></li>
+            <li><a href="#failures">Limited evidence</a></li>
+            <li><a href="#architecture">Architecture</a></li>
+          </ul>
+          <a class="aside-cta" href="../#scanner">Scan a URL →</a>
+        </aside>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="wrap">
+        <div class="cta-band">
+          <div>
+            <p class="eyebrow">See it in practice</p>
+            <h2>Run a live URL scan</h2>
+            <p>Check a public link and read the provider status before you decide.</p>
+          </div>
+          <div class="cta-actions">
+            <a class="btn btn-primary" href="../#scanner">Scan a URL</a>
+            <a class="btn" href="../url-security-guide/">Read the guide</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <div class="footer-grid">
+        <div>
+          <a class="footer-brand" href="../" aria-label="Zero Trace home">
+            <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+              <rect x="1" y="1" width="30" height="30" rx="9" fill="#0a141b" stroke="#24414e"></rect>
+              <circle cx="16" cy="16" r="9" fill="none" stroke="#51e4ff" stroke-opacity=".28"></circle>
+              <circle cx="16" cy="16" r="5" fill="none" stroke="#51e4ff" stroke-opacity=".55"></circle>
+              <circle cx="16" cy="16" r="1.8" fill="#51e4ff"></circle>
+            </svg>
+            <span>ZERO TRACE</span>
+          </a>
+          <p class="footer-about">A free, evidence-based URL security scanner. Built by Mano Francis Dev to make link checking more transparent.</p>
+        </div>
+        <div class="footer-col">
+          <h2>Product</h2>
+          <a href="../features/">Features</a>
+          <a href="../how-it-works/">How it works</a>
+          <a href="../faq/">FAQ</a>
+        </div>
+        <div class="footer-col">
+          <h2>Learn</h2>
+          <a href="../url-security-guide/">URL security guide</a>
+          <a href="../phishing-detection/">Phishing detection</a>
+          <a href="../privacy/">Privacy &amp; data</a>
+        </div>
+        <div class="footer-col">
+          <h2>Project</h2>
+          <a href="../about/">About</a>
+          <a href="https://github.com/manofrancis-dev/ZeroTrace" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
+          <a href="https://manofrancis-dev.github.io/manofrancis-portfolio/" target="_blank" rel="noopener noreferrer">Portfolio ↗</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2026 Mano Francis Dev · Zero Trace</p>
+        <p class="footer-disclaimer">Independent project. Not affiliated with VirusTotal, Google, or any security vendor. A scan result is not a guarantee of future safety.</p>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Privacy &amp; Data Handling | Zero Trace</title>
+  <meta name="description" content="How Zero Trace handles submitted URLs, scan sessions, third-party services, cookies, hosting logs, and analytics. Read before scanning a link.">
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <meta name="author" content="Mano Francis Dev">
+  <meta name="theme-color" content="#050a0e">
+  <link rel="canonical" href="https://manofrancis-dev.github.io/ZeroTrace/privacy/">
+
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Zero Trace">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:title" content="Privacy &amp; Data Handling | Zero Trace">
+  <meta property="og:description" content="How Zero Trace handles submitted URLs, scan sessions, third-party services, cookies, hosting logs, and analytics.">
+  <meta property="og:url" content="https://manofrancis-dev.github.io/ZeroTrace/privacy/">
+  <meta property="og:image" content="https://manofrancis-dev.github.io/ZeroTrace/assets/img/og-zero-trace-url-scanner.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Zero Trace wordmark on a dark cybersecurity grid with the headline Check a URL before you trust it.">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Privacy &amp; Data Handling | Zero Trace">
+  <meta name="twitter:description" content="How Zero Trace handles submitted URLs, scan sessions, third-party services, cookies, hosting logs, and analytics.">
+  <meta name="twitter:image" content="https://manofrancis-dev.github.io/ZeroTrace/assets/img/og-zero-trace-url-scanner.png">
+  <meta name="twitter:image:alt" content="Zero Trace wordmark on a dark cybersecurity grid with the headline Check a URL before you trust it.">
+
+  <link rel="icon" type="image/svg+xml" href="../assets/img/favicon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="../assets/img/favicon-32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="../assets/img/apple-touch-icon.png">
+  <link rel="stylesheet" href="../assets/css/site.css">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebPage",
+        "@id": "https://manofrancis-dev.github.io/ZeroTrace/privacy/#webpage",
+        "url": "https://manofrancis-dev.github.io/ZeroTrace/privacy/",
+        "name": "Privacy & Data Handling | Zero Trace",
+        "description": "How Zero Trace handles submitted URLs, scan sessions, third-party services, cookies, hosting logs, and analytics.",
+        "isPartOf": { "@id": "https://manofrancis-dev.github.io/ZeroTrace/#website" },
+        "inLanguage": "en"
+      },
+      {
+        "@type": "BreadcrumbList",
+        "@id": "https://manofrancis-dev.github.io/ZeroTrace/privacy/#breadcrumbs",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://manofrancis-dev.github.io/ZeroTrace/" },
+          { "@type": "ListItem", "position": 2, "name": "Privacy & data", "item": "https://manofrancis-dev.github.io/ZeroTrace/privacy/" }
+        ]
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to main content</a>
+
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../" aria-label="Zero Trace home">
+        <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+          <rect x="1" y="1" width="30" height="30" rx="9" fill="#0a141b" stroke="#24414e"></rect>
+          <circle cx="16" cy="16" r="9" fill="none" stroke="#51e4ff" stroke-opacity=".28"></circle>
+          <circle cx="16" cy="16" r="5" fill="none" stroke="#51e4ff" stroke-opacity=".55"></circle>
+          <circle cx="16" cy="16" r="1.8" fill="#51e4ff"></circle>
+          <path d="M16 4v4M16 24v4M4 16h4M24 16h4" stroke="#51e4ff" stroke-opacity=".6" stroke-linecap="round"></path>
+        </svg>
+        <span>ZERO TRACE</span>
+      </a>
+      <div class="header-right">
+        <span class="header-badge">LIVE URL SECURITY INTELLIGENCE</span>
+        <nav class="site-nav" aria-label="Primary">
+          <a href="../features/">Features</a>
+          <a href="../how-it-works/">How it works</a>
+          <a href="../url-security-guide/">Security guide</a>
+          <a href="../phishing-detection/">Phishing</a>
+          <a href="../faq/">FAQ</a>
+          <a href="../about/">About</a>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="section page-hero" aria-labelledby="page-title">
+      <div class="wrap">
+        <nav class="breadcrumbs" aria-label="Breadcrumb">
+          <ol>
+            <li><a href="../">Home</a></li>
+            <li aria-current="page">Privacy &amp; data</li>
+          </ol>
+        </nav>
+        <p class="eyebrow">Privacy notes</p>
+        <h1 id="page-title">Privacy and data handling</h1>
+        <p class="lead">Zero Trace is a security tool, so its data handling should be clear before you paste a link. This page explains what the scanner processes, what it does not store, and which third parties are involved.</p>
+        <div class="page-meta"><span>Updated 27 November 2026</span><span>No analytics installed</span><span>Read before scanning</span></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="wrap article-layout">
+        <article class="prose">
+          <div class="callout warn">
+            <p><strong>Do not scan private, confidential, authenticated, or personal URLs.</strong> A scan sends the URL to the backend and to third-party services. VirusTotal’s documentation says submitted or queried items may be added to its dataset.</p>
+          </div>
+
+          <h2 id="summary">Summary</h2>
+          <ul>
+            <li>Zero Trace does not maintain a scan-history database and does not offer saved results.</li>
+            <li>Scan API responses are marked no-store.</li>
+            <li>A functional session cookie authorizes the scan. It is not an advertising or analytics cookie.</li>
+            <li>No analytics script is installed on this website.</li>
+            <li>The submitted URL is processed by the backend, VirusTotal and RDAP when configured, and an isolated browser sandbox.</li>
+            <li>Hosting providers may keep operational logs under their own policies.</li>
+          </ul>
+
+          <h2 id="submitted">What happens when you submit a URL</h2>
+          <ol>
+            <li>Your browser sends the URL to the Zero Trace API over HTTPS.</li>
+            <li>The API validates the URL, rejects private or reserved destinations, and strips URL-embedded credentials before external requests.</li>
+            <li>When configured, the API queries VirusTotal for URL reputation and may request a fresh analysis. It queries RDAP for domain or IP registration context.</li>
+            <li>The URL is opened in an isolated Chromium sandbox to observe redirects, page behavior, and downloads.</li>
+            <li>The API returns a structured report to your browser. The response is marked no-store.</li>
+          </ol>
+
+          <h2 id="stored">What Zero Trace stores</h2>
+          <p>The Zero Trace application does not write submitted URLs or scan results to a database. There is no account system and no saved scan history. The API keeps an in-memory rate-limit counter per client address for a short rolling window; that counter does not contain the URL.</p>
+          <p>The hosting providers that run the frontend and backend may keep standard operational logs, such as request timestamps, IP addresses, and error information, under their own retention policies. Zero Trace does not control those logs. If you need to avoid any third-party processing, do not submit a URL.</p>
+
+          <h2 id="cookies">Cookies</h2>
+          <p>Zero Trace sets a functional cookie named <code>zero_trace_session</code> when you start a scan. It is HTTP-only, expires after the configured session lifetime (15 minutes by default), and is used only to authorize the scan request. On the hosted deployment it is marked Secure and, when the frontend and backend are on different sites, SameSite=None so the cross-site scan request can work.</p>
+          <p>This site does not set advertising cookies, analytics cookies, or third-party tracking cookies. Because only a strictly functional cookie is used, no consent banner is shown. If analytics or other non-essential tracking is added in the future, this page and the consent approach must be updated first.</p>
+
+          <h2 id="third-parties">Third-party services</h2>
+          <div class="table-wrap">
+            <table>
+              <caption>Services involved in a scan</caption>
+              <thead>
+                <tr><th scope="col">Service</th><th scope="col">Role</th><th scope="col">Data consideration</th></tr>
+              </thead>
+              <tbody>
+                <tr><th scope="row">GitHub Pages</th><td>Serves the static website.</td><td>Standard web-server logs under GitHub’s policies.</td></tr>
+                <tr><th scope="row">Render</th><td>Hosts the FastAPI backend.</td><td>Operational logs and request metadata under Render’s policies.</td></tr>
+                <tr><th scope="row">VirusTotal</th><td>URL reputation and optional fresh analysis.</td><td>The URL is submitted to VirusTotal. Its documentation says submitted or queried items may be added to its dataset.</td></tr>
+                <tr><th scope="row">RDAP</th><td>Domain or IP registration lookup.</td><td>The domain or IP is queried through rdap.org.</td></tr>
+                <tr><th scope="row">Browser sandbox</th><td>Isolated Chromium analysis.</td><td>The sandbox fetches the URL from an isolated environment.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>These services have their own terms and privacy policies. Zero Trace does not control their retention or processing. Do not submit confidential URLs.</p>
+
+          <h2 id="analytics">Analytics</h2>
+          <p>No Google Analytics, Bing tracking, advertising pixel, or other analytics script is installed on this website. If privacy-friendly analytics are added later, they should be configured to avoid collecting submitted URLs, scan results, query strings, or other sensitive data. This page will be updated before any such change.</p>
+
+          <h2 id="security">Security measures</h2>
+          <ul>
+            <li>HTTPS for the website and API in the hosted deployment.</li>
+            <li>Signed, short-lived scan session cookies.</li>
+            <li>SSRF protection that rejects private, loopback, local, multicast, and reserved destinations.</li>
+            <li>URL credential stripping before external requests.</li>
+            <li>Rate limiting on the expensive scan endpoint.</li>
+            <li>No-store headers on scan API responses.</li>
+            <li>Network isolation for the browser sandbox.</li>
+          </ul>
+          <p>These measures reduce risk but do not make scanning risk-free. Security is not a guarantee, and no service can promise that a third party will never experience an incident.</p>
+
+          <h2 id="choices">Your choices</h2>
+          <ul>
+            <li>Do not submit URLs that contain private, confidential, or personal information.</li>
+            <li>Use the official app or a known address instead of a link when you need to verify an account.</li>
+            <li>Clear the session cookie by closing the browser or clearing site data.</li>
+            <li>Use the <a href="../faq/">FAQ</a> and <a href="../url-security-guide/">security guide</a> without submitting a URL.</li>
+          </ul>
+
+          <h2 id="contact">Questions or corrections</h2>
+          <p>For privacy questions or corrections, open an issue on the <a href="https://github.com/manofrancis-dev/ZeroTrace" target="_blank" rel="noopener noreferrer">Zero Trace GitHub repository</a>. Do not include sensitive URLs or personal information in a public issue.</p>
+
+          <h2 id="changes">Changes to this page</h2>
+          <p>This page is updated when the scanner’s data handling changes. The “Updated” date at the top reflects the latest review. Material changes should be described in the repository history.</p>
+
+          <div class="author-box">
+            <div class="author-avatar" aria-hidden="true">MF</div>
+            <p><b>Maintained by Mano Francis Dev.</b> This page describes the current implementation, not a legal certification. For a specific compliance question, consult a qualified professional. <a href="../about/">About Zero Trace</a>.</p>
+          </div>
+        </article>
+
+        <aside class="article-aside" aria-label="On this page">
+          <h2>On this page</h2>
+          <ul>
+            <li><a href="#summary">Summary</a></li>
+            <li><a href="#submitted">URL processing</a></li>
+            <li><a href="#stored">What is stored</a></li>
+            <li><a href="#cookies">Cookies</a></li>
+            <li><a href="#third-parties">Third parties</a></li>
+            <li><a href="#analytics">Analytics</a></li>
+            <li><a href="#security">Security</a></li>
+            <li><a href="#choices">Your choices</a></li>
+            <li><a href="#changes">Changes</a></li>
+          </ul>
+          <a class="aside-cta" href="../#scanner">Scan a URL →</a>
+        </aside>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="wrap">
+        <div class="cta-band">
+          <div>
+            <p class="eyebrow">Understand the tool</p>
+            <h2>Read the methodology</h2>
+            <p>See how validation, providers, sandbox analysis, and scoring fit together.</p>
+          </div>
+          <div class="cta-actions">
+            <a class="btn btn-primary" href="../how-it-works/">How it works</a>
+            <a class="btn" href="../faq/">FAQ</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <div class="footer-grid">
+        <div>
+          <a class="footer-brand" href="../" aria-label="Zero Trace home">
+            <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+              <rect x="1" y="1" width="30" height="30" rx="9" fill="#0a141b" stroke="#24414e"></rect>
+              <circle cx="16" cy="16" r="9" fill="none" stroke="#51e4ff" stroke-opacity=".28"></circle>
+              <circle cx="16" cy="16" r="5" fill="none" stroke="#51e4ff" stroke-opacity=".55"></circle>
+              <circle cx="16" cy="16" r="1.8" fill="#51e4ff"></circle>
+            </svg>
+            <span>ZERO TRACE</span>
+          </a>
+          <p class="footer-about">A free, evidence-based URL security scanner. Built by Mano Francis Dev to make link checking more transparent.</p>
+        </div>
+        <div class="footer-col">
+          <h2>Product</h2>
+          <a href="../features/">Features</a>
+          <a href="../how-it-works/">How it works</a>
+          <a href="../faq/">FAQ</a>
+        </div>
+        <div class="footer-col">
+          <h2>Learn</h2>
+          <a href="../url-security-guide/">URL security guide</a>
+          <a href="../phishing-detection/">Phishing detection</a>
+          <a href="../privacy/">Privacy &amp; data</a>
+        </div>
+        <div class="footer-col">
+          <h2>Project</h2>
+          <a href="../about/">About</a>
+          <a href="https://github.com/manofrancis-dev/ZeroTrace" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
+          <a href="https://manofrancis-dev.github.io/manofrancis-portfolio/" target="_blank" rel="noopener noreferrer">Portfolio ↗</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2026 Mano Francis Dev · Zero Trace</p>
+        <p class="footer-disclaimer">Independent project. Not affiliated with VirusTotal, Google, or any security vendor. A scan result is not a guarantee of future safety.</p>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

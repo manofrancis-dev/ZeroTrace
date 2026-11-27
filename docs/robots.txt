@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+
+# Sitemap for the canonical GitHub Pages deployment.
+Sitemap: https://manofrancis-dev.github.io/ZeroTrace/sitemap.xml
+
+# Note: on a GitHub project page, crawlers fetch robots.txt from the host root
+# (https://manofrancis-dev.github.io/robots.txt), not from this project path.
+# The sitemap is still submitted through Google Search Console and Bing Webmaster Tools.
